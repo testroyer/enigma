@@ -35,6 +35,13 @@ namespace Enigma {
             // get reverse connection ?
     };
 
+    class Enigma {
+        private: 
+            map<string, string> reflectorWiring;
+        public:
+            Enigma();
+    };
+
 }
 
 #endif
