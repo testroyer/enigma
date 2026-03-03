@@ -17,9 +17,22 @@ namespace Enigma {
         public:
             Rotor(int startPosition, string chiffre);        
             void setPosition(int pos);
-            void rotate();
+            void rotateForwards();
+            void rotateBackwards();
             void getReverseWiring();
 
+    };
+
+    class Plugboard {
+        private:
+            map<string, string> wiring;
+
+        public:
+            Plugboard(string connections);
+            void addConnection(string pair);
+            void removeConnection(string pair);
+            int getConnectionNumber();
+            // get reverse connection ?
     };
 
 }
