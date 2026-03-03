@@ -1,0 +1,46 @@
+# Compiled objects
+*.o
+*.obj
+*.out
+*.exe
+
+# Libraries
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+
+# Build directories
+build/
+dist/
+bin/
+lib/
+
+# IDE
+.vscode/
+.vs/
+.idea/
+*.swp
+*.swo
+*~
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
+
+# CMake
+CMakeFiles/
+CMakeUserPresets.json
+cmake_install.cmake
+Makefile
+*.cmake
+
+# Dependencies
+node_modules/
+vcpkg_installed/
+
+# Other
+.env
+*.log
