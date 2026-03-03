@@ -3,15 +3,16 @@
 
 #include <map>
 #include <string>
+#include <biapir.h>
 
 using namespace std;
-
+// À revoir après la création de la classe Biapir, pour voir si on peut l'utiliser pour les rotors et le plugboard
 namespace Enigma {
 
     class Rotor {
         private:
             int position;
-            map<string , string> intWiring;
+            Bipair<string> intWiring;
             map<string, string> createInternalWiringMap(string chiffre); 
             int notchPlacement; 
 
