@@ -13,6 +13,7 @@ namespace Enigma {
             int position;
             map<string , string> intWiring;
             map<string, string> createInternalWiringMap(string chiffre); 
+            int notchPlacement; 
 
         public:
             Rotor(int startPosition, string chiffre);        
@@ -39,6 +40,7 @@ namespace Enigma {
         private: 
             map<string, string> reflectorWiring;
         public:
+            const string enigmaAllowedLetters[26];
             Enigma();
     };
 
