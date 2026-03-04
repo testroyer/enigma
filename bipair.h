@@ -62,6 +62,10 @@ class Bipair {
             }); 
         };
 
+        int length() const {
+            return pairs.size();
+        }; 
+
         T getCorrespondant (const T& query) const {
             auto result = std::find_if(pairs.begin() , pairs.end() , [&query](const auto& p){
                 return p.first == query || p.second == query;

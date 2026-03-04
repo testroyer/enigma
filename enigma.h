@@ -2,62 +2,89 @@
 #define ENIGMA_H
 
 #include <string>
-#include <bipair.h>
+#include "bipair.h"
+#include <vector>
+#include <initializer_list>
+#include <stdexcept>
+#include <utility>
+#include <map>
 
-// À revoir après la création de la classe Biapir, pour voir si on peut l'utiliser pour les rotors et le plugboard
 namespace Enigma {
-
+    //Every class has two ctors, one that ctors with built objects and one that ctors with initializer lists. 
     class Rotor {
         private:
             int position;
             int notchPlacement; 
 
         protected:
-            Bipair<std::string> intWiring;
-            Bipair<std::string> createInternalWiringMap(std::string chiffre); 
+
+            // Must use map here as two sides of the rotors are connected.
+            std::map<char ,char> intWiring;
+            std::map<char, char> createInternalWiringMap(std::string chiffre); 
             //Chiffre means the order the the letters are cyrpted (For "ZASTQ..." , A->Z ,B->A and so on ) 
 
         public:
-            Rotor(int startPosition, std::string chiffre);        
+            Rotor(std::string chiffre, int startPosition = 0, int notchPlacement = 0);        
+            Rotor(std::map<char , char>& wiring, int startPosition = 0, int notchPlacement = 0);
             void setPosition(int pos);
-            int getPosition();
+            int getPosition() const;
             void rotateForwards();
             void rotateBackwards();
-            void getReverseWiring();
-            std::string run();
-            std::string reverseRun();
+            const std::map<char , char> getReverseWiring() const;
+            char run(char character) const;
+            char reverseRun(char character) const;
+
+            // std::string run();   //Wouldn't hurt to have a string overload lateron
+            // std::string reverseRun();
 
     };
     
-    class Reflector : private Rotor {
+    class Reflector {
         private:
+            const Bipair<char> wiring;
         public:
             Reflector(std::string chiffre);
-            using Rotor::getReverseWiring;
-            using Rotor::run;
-            using Rotor::reverseRun;
-
+            Reflector(Bipair<char> wiring);
+            const Bipair<char>& getWiring() const;
+            char run(char character) const;
     };
 
     class Plugboard {
         private:
-            Bipair<std::string> wiring;
+            Bipair<char> connections;
 
         public:
-            Plugboard(Bipair<std::string> plugboardWiring); //not sure about the string here, at last I will turn it into a bipair object so I may get it as so anyways
-            void addConnection(std::string pair);
-            void removeConnection(std::string pair);
-            int getConnectionNumber();
-            std::string run();
-            std::string reverseRun();
+            Plugboard(const Bipair<char>& plugboardWiring); //not sure about the string here, at last I will turn it into a bipair object so I may get it as so anyways
+            void addConnection(std::pair<char , char> pair);
+            void removeConnection(std::pair<char , char> pair);
+            int getConnectionNumber() const;
+            const Bipair<char>& getConnections() const;
+            char run(char character) const;
             // get reverse connection ?
     };
 
     class Enigma {
         private: 
         public:
+            //TODO
+            //Gets already created objects
+            Enigma(std::vector<Rotor> rotors, Reflector reflector, Plugboard initialPlugboard);
+            
+            //Gets the data to create the objects itself.
+            Enigma(std::initializer_list<std::map<char, char>> rotors, Bipair<char> reflector, Bipair<char> initialPlugboard);
+            Enigma(std::initializer_list<std::string> rotorsChiffres, std::string reflectorChiffre, Bipair<char> initialPlugboard);
+
             const std::string enigmaAllowedLetters[26];
-            Enigma();
+
+            std::vector<Rotor> rotors;
+            Reflector reflector;
+            Plugboard plugboard;
+
+            std::string encrypt(std::string message);
+            char encrypt(char character);
+            int getRotorCount() const;
+            void setRotorPositions(std::vector<int> positions);
+            void setRotorPositions(std::initializer_list<int> positions);
     };
 
 }
