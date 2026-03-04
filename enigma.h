@@ -44,7 +44,7 @@ namespace Enigma {
             Bipair<std::string> wiring;
 
         public:
-            Plugboard(std::string connections);
+            Plugboard(Bipair<std::string> plugboardWiring); //not sure about the string here, at last I will turn it into a bipair object so I may get it as so anyways
             void addConnection(std::string pair);
             void removeConnection(std::string pair);
             int getConnectionNumber();
