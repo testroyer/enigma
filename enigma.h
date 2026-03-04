@@ -1,49 +1,62 @@
 #ifndef ENIGMA_H
 #define ENIGMA_H
 
-#include <map>
 #include <string>
 #include <bipair.h>
 
-using namespace std;
 // À revoir après la création de la classe Biapir, pour voir si on peut l'utiliser pour les rotors et le plugboard
 namespace Enigma {
 
     class Rotor {
         private:
             int position;
-            Bipair<string> intWiring;
             int notchPlacement; 
-            Bipair<string> createInternalWiringMap(string chiffre); 
+
+        protected:
+            Bipair<std::string> intWiring;
+            Bipair<std::string> createInternalWiringMap(std::string chiffre); 
             //Chiffre means the order the the letters are cyrpted (For "ZASTQ..." , A->Z ,B->A and so on ) 
 
         public:
-            Rotor(int startPosition, string chiffre);        
+            Rotor(int startPosition, std::string chiffre);        
             void setPosition(int pos);
             int getPosition();
             void rotateForwards();
             void rotateBackwards();
             void getReverseWiring();
+            std::string run();
+            std::string reverseRun();
+
+    };
+    
+    class Reflector : private Rotor {
+        private:
+        public:
+            Reflector(std::string chiffre);
+            using Rotor::getReverseWiring;
+            using Rotor::run;
+            using Rotor::reverseRun;
 
     };
 
     class Plugboard {
         private:
-            Bipair<string> wiring;
+            Bipair<std::string> wiring;
 
         public:
-            Plugboard(string connections);
-            void addConnection(string pair);
-            void removeConnection(string pair);
+            Plugboard(std::string connections);
+            void addConnection(std::string pair);
+            void removeConnection(std::string pair);
             int getConnectionNumber();
+            std::string run();
+            std::string reverseRun();
             // get reverse connection ?
     };
 
     class Enigma {
         private: 
-            Bipair<string> reflectorWiring;
         public:
-            const string enigmaAllowedLetters[26];
+            const std::string enigmaAllowedLetters[26];
             Enigma();
     };
 
