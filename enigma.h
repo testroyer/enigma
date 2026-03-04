@@ -3,7 +3,7 @@
 
 #include <map>
 #include <string>
-#include <biapir.h>
+#include <bipair.h>
 
 using namespace std;
 // À revoir après la création de la classe Biapir, pour voir si on peut l'utiliser pour les rotors et le plugboard
