@@ -13,12 +13,14 @@ namespace Enigma {
         private:
             int position;
             Bipair<string> intWiring;
-            map<string, string> createInternalWiringMap(string chiffre); 
             int notchPlacement; 
+            Bipair<string> createInternalWiringMap(string chiffre); 
+            //Chiffre means the order the the letters are cyrpted (For "ZASTQ..." , A->Z ,B->A and so on ) 
 
         public:
             Rotor(int startPosition, string chiffre);        
             void setPosition(int pos);
+            int getPosition();
             void rotateForwards();
             void rotateBackwards();
             void getReverseWiring();
@@ -27,7 +29,7 @@ namespace Enigma {
 
     class Plugboard {
         private:
-            map<string, string> wiring;
+            Bipair<string> wiring;
 
         public:
             Plugboard(string connections);
@@ -39,7 +41,7 @@ namespace Enigma {
 
     class Enigma {
         private: 
-            map<string, string> reflectorWiring;
+            Bipair<string> reflectorWiring;
         public:
             const string enigmaAllowedLetters[26];
             Enigma();
