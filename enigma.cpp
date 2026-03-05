@@ -59,6 +59,7 @@ namespace EnigmaMachine {
             int getNotchPosition() const{
                 return this->notchPlacement;
             };
+            void setNotchPosition();
 
             //the return value will determine if the rotor adjacent shall be rotated aswell
             bool rotateForwards(){
@@ -103,11 +104,14 @@ namespace EnigmaMachine {
         private:
             Bipair<char> connections;
 
+            int maximumConnections;
         public:
             Plugboard(const Bipair<char>& plugboardWiring);
             void addConnection(pair<char , char> pair);
-            void removeConnection(pair<char , char> pair);
+            void removeConnection(pair<char , char> pair); //Dont need to Check if the reverse is the pair in the bimap
             int getConnectionNumber() const;
+            int getMaximumConnections() const;
+            void setMaximumConenctions() const;
             const Bipair<char>& getConnections() const;
             char run(char character) const;
             // get reverse connection ?

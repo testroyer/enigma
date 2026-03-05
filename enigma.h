@@ -11,76 +11,158 @@
 
 namespace EnigmaMachine {
     
-    //List of enigma enabled Latin characters
+    // char[27] enigmaAllowedLetters: List of enigma enabled Latin characters
     const char enigmaAllowedLetters[27];
 
+    /*
+    elass simulating the rotorrotorss of an Enigma Machine.
+    */
     class Rotor {
         private:
-            // Value [0, 25], determines the current orientation of the rotor.
+            // Determines the current oriantation of the rotor.
             int position; 
 
-            
+            //The position that rotates the next rotor with itself.
             int notchPlacement; 
 
         protected:
-            // Must use map here as two sides of the rotors are connected.
-
+            // Internal map "forwards" wiring of the rotor.
             std::map<char ,char> intWiring;
+
+            /*
+            Creates internal wiring by relating the chiffre to the enigmaAllowedLetters in order.
+            Chiffre is a 26 char string. One by one it is maped to the enigma allowed lettres. ("A" -> [0] , "B" -> [1] and so o and so on).
+            */
             std::map<char, char> createInternalWiringMap(std::string chiffre); 
 
         public:
 
+            /*
+            Rotor constructor.
+            Chiffre is a 26 char string. One by one it is maped to the enigma allowed lettres. ("A" -> [0] , "B" -> [1] and so o and so on).
+            */
             Rotor(std::string chiffre, int startPosition = 0, int notchPlacement = 0);        
+
+            /*
+            Rotor constructor by map object.
+            */
             Rotor(std::map<char , char>& wiring, int startPosition = 0, int notchPlacement = 0);
+        
+            // Sets int position porperty.
             void setPosition(int pos);
+
+            // Gets int position porperty.
             int getPosition() const;
+
+            // Gets int notchPosition porperty.
             int getNotchPosition() const;
+
+            // Sets int notchPosition porperty.
+            void setNotchPosition();
+
+            /*
+            Increments rotor position by one.
+            If the return value is true, that means the notch has passed and the left adjacent motor must be rotated.
+            */
             bool rotateForwards();
+
+            //Retuns the reverse wiring of the motor (key and value of the intWiring reversed).
             const std::map<char , char> getReverseWiring() const;
+
+            //Runs a letter through the internal wiring and returns the result as a char.
             char run(char character) const;
+
+            //Runs a letter through the internal wiring and returns the result as a char.
             char reverseRun(char character) const;
-
-            // void rotateBackwards();
-            // std::string run();   //Wouldn't hurt to have a string overload lateron
-            // std::string reverseRun();
-
     };
     
+    /*
+    Class simulating the Reflector of an Enigma Machine.
+    */
     class Reflector {
         private:
+            // Bidirectional map that contains connected letter couples.
             const Bipair<char> wiring;
+
         public:
+            /*
+            Reflector constructor by chiffre.
+            Chiffre is a 26 char string. One by one it is maped to the enigma allowed lettres. ("A" -> [0] , "B" -> [1] and so o and so on).
+            */
             Reflector(std::string chiffre);
+
+            /*
+            Reflector constructor by a Bipair object.
+            */
             Reflector(Bipair<char> wiring);
+
+            // Returns const Bipair<char> wiring object.
             const Bipair<char>& getWiring() const;
+
+            //Runs a char character through the reflector and returns the result as a char.
             char run(char character) const;
+
     };
 
+    /*
+    Class simulating the Plugboard of an Enigma Machine.
+    */
     class Plugboard {
         private:
+            // Bidirectional map that contains connected letter couples.
             Bipair<char> connections;
 
+            // The maximum number of connections. By default this will be set to 10.
+            int maximumConnections;
+
         public:
+            /*
+            Plugboard constructor by a Bipair object.
+            */
             Plugboard(const Bipair<char>& plugboardWiring);
+
+            // Adds a connection to the plugboard if the maximum connection number won't be passed and both plugs are free.
             void addConnection(std::pair<char , char> pair);
+
+            //Removes a connection if that exact connection exists.
             void removeConnection(std::pair<char , char> pair);
+            
+            //Gets the number of present connections.
             int getConnectionNumber() const;
+
+            //Gets the current number for maximum amount of connections.
+            int getMaximumConnections() const;
+
+            //Sets the current number for maximum amount of connections.
+            void setMaximumConenctions();
+            
+            //Returns the Bipair<char> connections property.
             const Bipair<char>& getConnections() const;
+
+            //Runs a letter through the plugboard and returns the result as a char.
             char run(char character) const;
-            // get reverse connection ?
     };
 
+    /*
+    The class that brings together the rotors, the reflector and the plugboard of an enigma machine.
+    */
     class Enigma {
         private: 
         public:
-            //Gets already created objects
+            //Enigma constructor by already created objects
             Enigma(std::vector<Rotor> rotors, Reflector reflector, Plugboard initialPlugboard);
             
             /*
             Gets the data to create the objects itself.
-            Problem with these is that they don't determine any notch placement
+            This constructor doesn't specify a notch position for the rotors. You must set it yourself.
             */
             Enigma(std::initializer_list<std::map<char, char>> rotors, Bipair<char> reflector, Bipair<char> initialPlugboard);
+
+            /*
+            Gets the data to create the objects itself.
+            This constructor doesn't specify a notch position for the rotors. You must set it yourself.
+            Chiffre is a 26 char string. One by one it is maped to the enigma allowed lettres. ("A" -> [0] , "B" -> [1] and so o and so on).
+            */
             Enigma(std::initializer_list<std::string> rotorsChiffres, std::string reflectorChiffre, Bipair<char> initialPlugboard);
 
 
