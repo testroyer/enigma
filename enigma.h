@@ -91,6 +91,9 @@ namespace EnigmaMachine {
         private:
             // Bidirectional map that contains connected letter couples.
             const Bipair<char> wiring;
+            
+            // Creates the bipair object for the wiring property
+            Bipair<char> createWiring(string chiffre);
 
         public:
            
@@ -150,7 +153,7 @@ namespace EnigmaMachine {
             int getMaximumConnections() const;
 
             //Sets the current number for maximum amount of connections.
-            void setMaximumConenctions();
+            void setMaximumConenctions(int newMax);
             
             //Returns the Bipair<char> connections property.
             const Bipair<char>& getConnections() const;

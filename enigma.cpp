@@ -10,6 +10,7 @@ using namespace std;
 
 namespace EnigmaMachine {
     //Every class has two ctors, one that ctors with built objects and one that ctors with initializer lists. 
+    //TODO: String ctors, chiffres and runs along with chars
 
 
     const char enigmaAllowedLetters[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -27,9 +28,9 @@ namespace EnigmaMachine {
             //Chiffre means the order the the letters are cyrpted (For "ZASTQ..." , A->Z ,B->A and so on ) 
             map<char, char> createInternalWiringMap(string chiffre){
                 if (chiffre.size() != 26) {
-                    runtime_error("Error: Size of chiffre does not match 26"); //Could be more explicative maybe
+                   throw runtime_error("Error: Size of chiffre does not match 26"); //Could be more explicative maybe
                 }
-                for (int i=0;i<=26;i++){
+                for (int i = 0; i < 26; i++){
                     intWiring[enigmaAllowedLetters[i]] = chiffre[i];
                 }
                 return this->intWiring; //Return value just-in-case
@@ -72,7 +73,7 @@ namespace EnigmaMachine {
 
             map<char , char> getReverseWiring() const {
                 map<char, char> reverseMap;
-                for (int i = 0; i<=26; i++) {
+                for (int i = 0; i < 26; i++) {
                     reverseMap[intWiring.at(enigmaAllowedLetters[i])] = enigmaAllowedLetters[i];
                 }
             };
@@ -86,6 +87,7 @@ namespace EnigmaMachine {
                 return reverse.at(character);
             };
 
+            //Scrapped function ideas, might be useful later on but for now they just add unneccesary complexity
             // void rotateBackwards();
             // string run();   //Wouldn't hurt to have a string overload lateron
             // string reverseRun();
@@ -95,29 +97,79 @@ namespace EnigmaMachine {
     class Reflector {
         private:
             const Bipair<char> wiring;
+
+            Bipair<char> createWiring(string chiffre) {
+                Bipair<char> bipair;
+
+                if (chiffre.size() != 26) {
+                    throw runtime_error("Error: Size of chiffre does not match 26");
+                }
+                for (int i = 0; i < 26; i++) {
+                    bipair.addPair(enigmaAllowedLetters[i] , chiffre.at(i));
+                }
+                return bipair;
+            };
         public:
             Reflector() = default;
-            Reflector(string chiffre);
-            Reflector(Bipair<char> wiring);
-            const Bipair<char>& getWiring() const;
-            char run(char character) const;
+
+            Reflector(string chiffre) : wiring(createWiring(chiffre)) {};
+
+            Reflector(Bipair<char> wiring) : wiring(wiring) {};
+
+            const Bipair<char>& getWiring() const {
+                return this->wiring;
+            };
+
+            char run(char character) const {
+                return wiring.getCorrespondant(character);
+            };
+
     };
 
     class Plugboard {
         private:
             Bipair<char> connections;
-
             int maximumConnections;
         public:
             Plugboard() = default;
-            Plugboard(const Bipair<char>& plugboardWiring);
-            void addConnection(pair<char , char> pair);
-            void removeConnection(pair<char , char> pair); //Dont need to Check if the reverse is the pair in the bimap
-            int getConnectionNumber() const;
-            int getMaximumConnections() const;
-            void setMaximumConenctions() const;
-            const Bipair<char>& getConnections() const;
-            char run(char character) const;
+
+            Plugboard(const Bipair<char>& plugboardWiring) : connections(plugboardWiring), maximumConnections(10) {};
+
+            void addConnection(pair<char , char> pair) {
+
+                if (connections.length() == maximumConnections) {
+                    throw runtime_error("Error: Maximum number of connections reached.");
+                }
+
+                connections.addPair(pair.first, pair.second);
+            };
+
+            void removeConnection(pair<char , char> pair) {
+                connections.removePair(pair.first, pair.second);
+            }; 
+
+            int getConnectionNumber() const {
+                return connections.length();
+            };
+
+            int getMaximumConnections() const {
+                return this->maximumConnections;
+            };
+
+            void setMaximumConenctions(int newMax) {
+                this->maximumConnections = newMax;
+            };
+            const Bipair<char>& getConnections() const {
+                return this->connections;
+            };
+
+            char run(char character) const {
+                if (connections.checkElementExistence(character, character)) {
+                    return connections.getCorrespondant(character);
+                } else {
+                    return character;
+                }
+            };
             // get reverse connection ?
     };
 

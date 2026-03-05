@@ -34,7 +34,7 @@ class Bipair {
         };
         Bipair (std::initializer_list<std::pair<T, T>> initialPairs) {
             
-            std::vector<std::pair<T, T>> vectorPairs(initialPairs)
+            std::vector<std::pair<T, T>> vectorPairs(initialPairs);
             if (initialHasDoublePairing(initialPairs)) {
                 throw std::runtime_error("Initial pairs contain duplicate elements.");
             }
