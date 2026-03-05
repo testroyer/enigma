@@ -27,8 +27,9 @@ namespace Enigma {
                 if (chiffre.size() != 26) {
                     runtime_error("Error: Size of chiffre does not match 26"); //Could be more explicative maybe
                 }
-
-                //I am here
+		for (int i=0;i<=26;i++){
+			//I am here
+		}
             }; 
 
         public:
