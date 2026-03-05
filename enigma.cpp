@@ -6,9 +6,11 @@
 #include <utility>
 #include <map>
 
+using namespace std;
+
 namespace Enigma {
     //Every class has two ctors, one that ctors with built objects and one that ctors with initializer lists. 
-    const std::string enigmaAllowedLetters[26];
+    const char enigmaAllowedLetters[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     class Rotor {
         private:
@@ -18,24 +20,31 @@ namespace Enigma {
         protected:
 
             // Must use map here as two sides of the rotors are connected.
-            std::map<char ,char> intWiring;
-            std::map<char, char> createInternalWiringMap(std::string chiffre); 
+            map<char ,char> intWiring;
+            
             //Chiffre means the order the the letters are cyrpted (For "ZASTQ..." , A->Z ,B->A and so on ) 
+            map<char, char> createInternalWiringMap(string chiffre){
+                if (chiffre.size() != 26) {
+                    runtime_error("Error: Size of chiffre does not match 26"); //Could be more explicative maybe
+                }
+
+                //I am here
+            }; 
 
         public:
-            Rotor(std::string chiffre, int startPosition = 0, int notchPlacement = 0);        
-            Rotor(std::map<char , char>& wiring, int startPosition = 0, int notchPlacement = 0);
+            Rotor(string chiffre, int startPosition = 0, int notchPlacement = 0);        
+            Rotor(map<char , char>& wiring, int startPosition = 0, int notchPlacement = 0);
             void setPosition(int pos);
             int getPosition() const;
             int getNotchPosition() const;
             bool rotateForwards(); //the return value will determine if the rotor adjacent shall be rotated aswell
-            const std::map<char , char> getReverseWiring() const;
+            const map<char , char> getReverseWiring() const;
             char run(char character) const;
             char reverseRun(char character) const;
 
             // void rotateBackwards();
-            // std::string run();   //Wouldn't hurt to have a string overload lateron
-            // std::string reverseRun();
+            // string run();   //Wouldn't hurt to have a string overload lateron
+            // string reverseRun();
 
     };
     
@@ -43,7 +52,7 @@ namespace Enigma {
         private:
             const Bipair<char> wiring;
         public:
-            Reflector(std::string chiffre);
+            Reflector(string chiffre);
             Reflector(Bipair<char> wiring);
             const Bipair<char>& getWiring() const;
             char run(char character) const;
@@ -55,8 +64,8 @@ namespace Enigma {
 
         public:
             Plugboard(const Bipair<char>& plugboardWiring);
-            void addConnection(std::pair<char , char> pair);
-            void removeConnection(std::pair<char , char> pair);
+            void addConnection(pair<char , char> pair);
+            void removeConnection(pair<char , char> pair);
             int getConnectionNumber() const;
             const Bipair<char>& getConnections() const;
             char run(char character) const;
@@ -67,25 +76,25 @@ namespace Enigma {
         private: 
         public:
             //Gets already created objects
-            Enigma(std::vector<Rotor> rotors, Reflector reflector, Plugboard initialPlugboard);
+            Enigma(vector<Rotor> rotors, Reflector reflector, Plugboard initialPlugboard);
             
             /*
             Gets the data to create the objects itself.
             Problem with these is that they don't determine any notch placement
             */
-            Enigma(std::initializer_list<std::map<char, char>> rotors, Bipair<char> reflector, Bipair<char> initialPlugboard);
-            Enigma(std::initializer_list<std::string> rotorsChiffres, std::string reflectorChiffre, Bipair<char> initialPlugboard);
+            Enigma(initializer_list<map<char, char>> rotors, Bipair<char> reflector, Bipair<char> initialPlugboard);
+            Enigma(initializer_list<string> rotorsChiffres, string reflectorChiffre, Bipair<char> initialPlugboard);
 
 
-            std::vector<Rotor> rotors;
+            vector<Rotor> rotors;
             Reflector reflector;
             Plugboard plugboard;
 
-            std::string encrypt(std::string message);
+            string encrypt(string message);
             char encrypt(char character);
             int getRotorCount() const;
-            void setRotorPositions(std::vector<int> positions);
-            void setRotorPositions(std::initializer_list<int> positions);
+            void setRotorPositions(vector<int> positions);
+            void setRotorPositions(initializer_list<int> positions);
     };
 
 }

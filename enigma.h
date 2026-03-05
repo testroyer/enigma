@@ -11,7 +11,7 @@
 
 namespace Enigma {
     //Every class has two ctors, one that ctors with built objects and one that ctors with initializer lists. 
-    const std::string enigmaAllowedLetters[26];
+    const char enigmaAllowedLetters[27];
 
     class Rotor {
         private:
