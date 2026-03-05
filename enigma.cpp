@@ -8,8 +8,10 @@
 
 using namespace std;
 
-namespace Enigma {
+namespace EnigmaMachine {
     //Every class has two ctors, one that ctors with built objects and one that ctors with initializer lists. 
+
+
     const char enigmaAllowedLetters[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     class Rotor {
@@ -27,21 +29,59 @@ namespace Enigma {
                 if (chiffre.size() != 26) {
                     runtime_error("Error: Size of chiffre does not match 26"); //Could be more explicative maybe
                 }
-		for (int i=0;i<=26;i++){
-			//I am here
-		}
+                for (int i=0;i<=26;i++){
+                    intWiring[enigmaAllowedLetters[i]] = chiffre[i];
+                }
+                return this->intWiring; //Return value just-in-case
             }; 
 
         public:
-            Rotor(string chiffre, int startPosition = 0, int notchPlacement = 0);        
-            Rotor(map<char , char>& wiring, int startPosition = 0, int notchPlacement = 0);
-            void setPosition(int pos);
-            int getPosition() const;
-            int getNotchPosition() const;
-            bool rotateForwards(); //the return value will determine if the rotor adjacent shall be rotated aswell
-            const map<char , char> getReverseWiring() const;
-            char run(char character) const;
-            char reverseRun(char character) const;
+            Rotor(string chiffre, int startPosition = 0, int notchPlacement = 0) 
+                : intWiring(createInternalWiringMap(chiffre)), 
+                position(startPosition), 
+                notchPlacement(notchPlacement) 
+            {};
+
+            Rotor(map<char , char>& wiring, int startPosition = 0, int notchPlacement = 0) 
+                : intWiring(wiring), 
+                position(startPosition), 
+                notchPlacement(notchPlacement) 
+            {};
+
+            void setPosition(int pos){
+                this->position = pos;
+            };
+            
+            int getPosition() const {
+                return this->position;
+            };
+
+            int getNotchPosition() const{
+                return this->notchPlacement;
+            };
+
+            //the return value will determine if the rotor adjacent shall be rotated aswell
+            bool rotateForwards(){
+                bool notchIsOn = (this->notchPlacement == this->position);
+                this->position++;
+                return notchIsOn;
+            };
+
+            map<char , char> getReverseWiring() const {
+                map<char, char> reverseMap;
+                for (int i = 0; i<=26; i++) {
+                    reverseMap[intWiring.at(enigmaAllowedLetters[i])] = enigmaAllowedLetters[i];
+                }
+            };
+
+            char run(char character) const{
+                return intWiring.at(character);
+            };
+
+            char reverseRun(char character) const {
+                auto reverse = this->getReverseWiring();
+                return reverse.at(character);
+            };
 
             // void rotateBackwards();
             // string run();   //Wouldn't hurt to have a string overload lateron

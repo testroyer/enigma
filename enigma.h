@@ -9,29 +9,33 @@
 #include <utility>
 #include <map>
 
-namespace Enigma {
-    //Every class has two ctors, one that ctors with built objects and one that ctors with initializer lists. 
+namespace EnigmaMachine {
+    
+    //List of enigma enabled Latin characters
     const char enigmaAllowedLetters[27];
 
     class Rotor {
         private:
-            int position; //[0,25]
+            // Value [0, 25], determines the current orientation of the rotor.
+            int position; 
+
+            
             int notchPlacement; 
 
         protected:
-
             // Must use map here as two sides of the rotors are connected.
+
             std::map<char ,char> intWiring;
             std::map<char, char> createInternalWiringMap(std::string chiffre); 
-            //Chiffre means the order the the letters are cyrpted (For "ZASTQ..." , A->Z ,B->A and so on ) 
 
         public:
+
             Rotor(std::string chiffre, int startPosition = 0, int notchPlacement = 0);        
             Rotor(std::map<char , char>& wiring, int startPosition = 0, int notchPlacement = 0);
             void setPosition(int pos);
             int getPosition() const;
             int getNotchPosition() const;
-            bool rotateForwards(); //the return value will determine if the rotor adjacent shall be rotated aswell
+            bool rotateForwards();
             const std::map<char , char> getReverseWiring() const;
             char run(char character) const;
             char reverseRun(char character) const;
