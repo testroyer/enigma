@@ -9,13 +9,18 @@
 #include <utility>
 #include <map>
 
+/// @todo: doxygen comments
+
 namespace EnigmaMachine {
     
-    // char[27] enigmaAllowedLetters: List of enigma enabled Latin characters
+    /** 
+    * char[27] enigmaAllowedLetters: List of enigma enabled Latin characters
+    * 
+    */
     const char enigmaAllowedLetters[27];
 
-    /*
-    elass simulating the rotorrotorss of an Enigma Machine.
+    /** 
+    *Class simulating the rotorrotorss of an Enigma Machine.
     */
     class Rotor {
         private:
@@ -165,15 +170,39 @@ namespace EnigmaMachine {
             */
             Enigma(std::initializer_list<std::string> rotorsChiffres, std::string reflectorChiffre, Bipair<char> initialPlugboard);
 
-
+            // The rotors of the enigma machine. The first element is the rightmost rotor, the last element is the leftmost rotor.
             std::vector<Rotor> rotors;
+
+            // The reflector of the enigma machine.
             Reflector reflector;
+
+            // The plugboard of the enigma machine.
             Plugboard plugboard;
 
+            /*
+            Encryption of a string message. The message is encrypted char by char and the result is returned as a string.
+            */
             std::string encrypt(std::string message);
+
+            // Encryption of a single char character. The result is returned as a char.
             char encrypt(char character);
+
+            // Returns the size of the rotors vector.
             int getRotorCount() const;
+
+            /*
+            Set the orientation of the rotors by a vector of integers starting from the rightmost rotor.
+            Size of the vector must be equal to the number of rotors. 
+            The integers must be between 0 and 25
+            */
             void setRotorPositions(std::vector<int> positions);
+
+            /*
+            Set the orientation of the rotors by a list of integers starting from the rightmost rotor.
+            Size of the list must be equal to the number of rotors. 
+            The integers must be between 0 and 25
+            Can be initialized with curly braces.
+            */
             void setRotorPositions(std::initializer_list<int> positions);
     };
 
