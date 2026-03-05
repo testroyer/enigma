@@ -11,9 +11,11 @@
 
 namespace Enigma {
     //Every class has two ctors, one that ctors with built objects and one that ctors with initializer lists. 
+    const std::string enigmaAllowedLetters[26];
+
     class Rotor {
         private:
-            int position;
+            int position; //[0,25]
             int notchPlacement; 
 
         protected:
@@ -28,12 +30,13 @@ namespace Enigma {
             Rotor(std::map<char , char>& wiring, int startPosition = 0, int notchPlacement = 0);
             void setPosition(int pos);
             int getPosition() const;
-            void rotateForwards();
-            void rotateBackwards();
+            int getNotchPosition() const;
+            bool rotateForwards(); //the return value will determine if the rotor adjacent shall be rotated aswell
             const std::map<char , char> getReverseWiring() const;
             char run(char character) const;
             char reverseRun(char character) const;
 
+            // void rotateBackwards();
             // std::string run();   //Wouldn't hurt to have a string overload lateron
             // std::string reverseRun();
 
@@ -54,7 +57,7 @@ namespace Enigma {
             Bipair<char> connections;
 
         public:
-            Plugboard(const Bipair<char>& plugboardWiring); //not sure about the string here, at last I will turn it into a bipair object so I may get it as so anyways
+            Plugboard(const Bipair<char>& plugboardWiring);
             void addConnection(std::pair<char , char> pair);
             void removeConnection(std::pair<char , char> pair);
             int getConnectionNumber() const;
@@ -66,15 +69,16 @@ namespace Enigma {
     class Enigma {
         private: 
         public:
-            //TODO
             //Gets already created objects
             Enigma(std::vector<Rotor> rotors, Reflector reflector, Plugboard initialPlugboard);
             
-            //Gets the data to create the objects itself.
+            /*
+            Gets the data to create the objects itself.
+            Problem with these is that they don't determine any notch placement
+            */
             Enigma(std::initializer_list<std::map<char, char>> rotors, Bipair<char> reflector, Bipair<char> initialPlugboard);
             Enigma(std::initializer_list<std::string> rotorsChiffres, std::string reflectorChiffre, Bipair<char> initialPlugboard);
 
-            const std::string enigmaAllowedLetters[26];
 
             std::vector<Rotor> rotors;
             Reflector reflector;
