@@ -36,6 +36,8 @@ namespace EnigmaMachine {
             }; 
 
         public:
+            Rotor() = default;
+            
             Rotor(string chiffre, int startPosition = 0, int notchPlacement = 0) 
                 : intWiring(createInternalWiringMap(chiffre)), 
                 position(startPosition), 
@@ -94,6 +96,7 @@ namespace EnigmaMachine {
         private:
             const Bipair<char> wiring;
         public:
+            Reflector() = default;
             Reflector(string chiffre);
             Reflector(Bipair<char> wiring);
             const Bipair<char>& getWiring() const;
@@ -106,6 +109,7 @@ namespace EnigmaMachine {
 
             int maximumConnections;
         public:
+            Plugboard() = default;
             Plugboard(const Bipair<char>& plugboardWiring);
             void addConnection(pair<char , char> pair);
             void removeConnection(pair<char , char> pair); //Dont need to Check if the reverse is the pair in the bimap
@@ -120,6 +124,9 @@ namespace EnigmaMachine {
     class Enigma {
         private: 
         public:
+
+            Enigma() = default;
+
             //Gets already created objects
             Enigma(vector<Rotor> rotors, Reflector reflector, Plugboard initialPlugboard);
             

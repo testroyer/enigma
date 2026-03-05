@@ -42,6 +42,9 @@ namespace EnigmaMachine {
 
         public:
 
+            //Default constructor. Creates a rotor with no internal wiring and position and notchPlacement set to 0.
+            Rotor();
+
             /*
             Rotor constructor.
             Chiffre is a 26 char string. One by one it is maped to the enigma allowed lettres. ("A" -> [0] , "B" -> [1] and so o and so on).
@@ -90,6 +93,10 @@ namespace EnigmaMachine {
             const Bipair<char> wiring;
 
         public:
+           
+            // Default constructor. Creates a reflector with no internal wiring.
+            Reflector();
+
             /*
             Reflector constructor by chiffre.
             Chiffre is a 26 char string. One by one it is maped to the enigma allowed lettres. ("A" -> [0] , "B" -> [1] and so o and so on).
@@ -121,6 +128,10 @@ namespace EnigmaMachine {
             int maximumConnections;
 
         public:
+            
+            // Default constructor. Creates a plugboard with no connections and maximumConnections set to 10.
+            Plugboard();
+
             /*
             Plugboard constructor by a Bipair object.
             */
@@ -154,6 +165,10 @@ namespace EnigmaMachine {
     class Enigma {
         private: 
         public:
+
+            // Default constructor. Creates an enigma machine with no rotors, no reflector and no plugboard connections.
+            Enigma() = default;
+
             //Enigma constructor by already created objects
             Enigma(std::vector<Rotor> rotors, Reflector reflector, Plugboard initialPlugboard);
             
