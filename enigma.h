@@ -17,7 +17,7 @@ namespace EnigmaMachine {
     * char[27] enigmaAllowedLetters: List of enigma enabled Latin characters
     * 
     */
-    const char enigmaAllowedLetters[27];
+    const char enigmaAllowedLetters[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     /** 
     *Class simulating the rotorrotorss of an Enigma Machine.
@@ -93,7 +93,7 @@ namespace EnigmaMachine {
             const Bipair<char> wiring;
             
             // Creates the bipair object for the wiring property
-            Bipair<char> createWiring(string chiffre);
+            Bipair<char> createWiring(std::string chiffre);
 
         public:
            
