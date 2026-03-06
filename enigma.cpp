@@ -11,6 +11,8 @@ using namespace std;
 namespace EnigmaMachine {
     //Every class has two ctors, one that ctors with built objects and one that ctors with initializer lists. 
     //TODO: String ctors, chiffres and runs along with chars
+    //TODO check int comparizons lengths value domains etc.
+    //TODO: Check this-> 'es
 
 
     const char enigmaAllowedLetters[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -52,6 +54,9 @@ namespace EnigmaMachine {
             {};
 
             void setPosition(int pos){
+                if ((pos > 25) || pos < 0) {
+                    throw runtime_error("Error: Position of a rotor must be an integer within [0 , 25]");
+                }
                 this->position = pos;
             };
             
@@ -121,7 +126,7 @@ namespace EnigmaMachine {
             };
 
             char run(char character) const {
-                return wiring.getCorrespondant(character);
+                return this->wiring.getCorrespondant(character);
             };
 
     };
@@ -177,28 +182,71 @@ namespace EnigmaMachine {
         private: 
         public:
 
+            vector<Rotor> rotors;
+            Reflector reflector;
+            Plugboard plugboard;
+
             Enigma() = default;
 
             //Gets already created objects
-            Enigma(vector<Rotor> rotors, Reflector reflector, Plugboard initialPlugboard);
+            Enigma(vector<Rotor> rotors, Reflector reflector, Plugboard initialPlugboard) 
+                : rotors(rotors), 
+                reflector(reflector), 
+                plugboard(initialPlugboard) 
+            {};
             
             /*
             Gets the data to create the objects itself.
             Problem with these is that they don't determine any notch placement
             */
-            Enigma(initializer_list<map<char, char>> rotors, Bipair<char> reflector, Bipair<char> initialPlugboard);
-            Enigma(initializer_list<string> rotorsChiffres, string reflectorChiffre, Bipair<char> initialPlugboard);
+            Enigma(initializer_list<map<char, char>> rotors, Bipair<char> reflector, Bipair<char> initialPlugboard) 
+                : reflector(reflector), 
+                plugboard(plugboard) 
+            {
+                for (int i = 0 ; i < rotors.size() ; i++) {
+                    this->rotors.emplace_back(*(rotors.begin()+i)); // Pointer maigic cause you know C++
+                }
+            };
 
+            Enigma(initializer_list<string> rotorsChiffres, string reflectorChiffre, Bipair<char> initialPlugboard)
+                : reflector(Reflector(reflectorChiffre)),
+                plugboard(initialPlugboard)
+            {
+                for (int i = 0; i < rotorsChiffres.size() ; i++) {
+                    (*this).rotors.emplace_back(*(rotorsChiffres.begin()+i));
+                }
+            };
 
-            vector<Rotor> rotors;
-            Reflector reflector;
-            Plugboard plugboard;
-
+            //Here ===============================================================================================================
             string encrypt(string message);
             char encrypt(char character);
-            int getRotorCount() const;
-            void setRotorPositions(vector<int> positions);
-            void setRotorPositions(initializer_list<int> positions);
+
+            int getRotorCount() const {
+                return this->rotors.size();
+            };
+
+            void setRotorPositions(vector<int> positions) {
+                if (this->rotors.size() != positions.size()) {
+                    throw runtime_error("Error: positions size does not match rotors size.");
+                }
+
+                for (int i = 0; i < this->rotors.size(); i++) {
+                    this->rotors[i].setPosition(positions[i]);
+                }
+
+            }
+
+            void setRotorPositions(initializer_list<int> positions){
+
+                if (this->rotors.size() != positions.size()) {
+                    throw runtime_error("Error: positions size does not match rotors size.");
+                }
+
+                for (int i = 0; i < this->rotors.size(); i++) {
+                    this->rotors[i].setPosition(*(positions.begin()+i));
+                }
+
+            }
     };
 
 }

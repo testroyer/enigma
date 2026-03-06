@@ -169,6 +169,15 @@ namespace EnigmaMachine {
         private: 
         public:
 
+            // The rotors of the enigma machine. The first element is the rightmost rotor, the last element is the leftmost rotor.
+            std::vector<Rotor> rotors;
+
+            // The reflector of the enigma machine.
+            Reflector reflector;
+
+            // The plugboard of the enigma machine.
+            Plugboard plugboard;
+
             // Default constructor. Creates an enigma machine with no rotors, no reflector and no plugboard connections.
             Enigma() = default;
 
@@ -187,15 +196,6 @@ namespace EnigmaMachine {
             Chiffre is a 26 char string. One by one it is maped to the enigma allowed lettres. ("A" -> [0] , "B" -> [1] and so o and so on).
             */
             Enigma(std::initializer_list<std::string> rotorsChiffres, std::string reflectorChiffre, Bipair<char> initialPlugboard);
-
-            // The rotors of the enigma machine. The first element is the rightmost rotor, the last element is the leftmost rotor.
-            std::vector<Rotor> rotors;
-
-            // The reflector of the enigma machine.
-            Reflector reflector;
-
-            // The plugboard of the enigma machine.
-            Plugboard plugboard;
 
             /*
             Encryption of a string message. The message is encrypted char by char and the result is returned as a string.
