@@ -11,7 +11,8 @@
 using namespace std;
 
 namespace EnigmaMachine {
-    //Every class has two ctors, one that ctors with built objects and one that ctors with initializer lists. 
+    // Every class has two ctors, one that ctors with built objects and one that ctors with initializer lists. 
+    // The value 26 is usually hard coded for enigmaAllowedLetters.size();
     //TODO: String ctors, chiffres and runs along with chars
     //TODO check int comparizons lengths value domains etc.
     //TODO: Check this-> 'es
@@ -19,11 +20,17 @@ namespace EnigmaMachine {
 
     const string enigmaAllowedLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+    const map<char, int> enigmaLetterToIndex = {{'A', 0}, {'B', 1}, {'C', 2}, {'D', 3}, {'E', 4}, {'F', 5}, {'G', 6}, {'H', 7}, {'I', 8}, {'J', 9}, {'K', 10}, {'L', 11}, {'M', 12}, {'N', 13}, {'O', 14}, {'P', 15}, {'Q', 16}, {'R', 17}, {'S', 18}, {'T', 19}, {'U', 20}, {'V', 21}, {'W', 22}, {'X', 23}, {'Y', 24}, {'Z', 25}};
+
     class Rotor {
         private:
             //[0,25] 
             // Actually it is the antirotation of the rotor. When it's one the Z is in A's place and so on. 
             int position; 
+            
+            // This notch placement variable is rather an ofset reference than a physical position on the rotor itself.
+            // To simplify le démarche the left rotor will be rotated when the current rotor is rotated whilst the notch is at the top.
+            // So in short rotate the left rotor when (currentIsBeingRotated && (this->notchPlacement==this->position))
             int notchPlacement; 
 
         protected:
@@ -34,11 +41,11 @@ namespace EnigmaMachine {
             //Chiffre means the order the the letters are cyrpted (For "ZASTQ..." , A->Z ,B->A and so on ) 
             map<char, char> createInternalWiringMap(string chiffre){
 
-                if (chiffre.size() != enigmaAllowedLetters.size()) {
+                if (chiffre.size() != 26) {
                    throw runtime_error("Error: Size of chiffre does not match 26"); //Could be more explicative maybe
                 }
 
-                for (int i = 0; i < enigmaAllowedLetters.size() ; i++){
+                for (int i = 0; i < 26 ; i++){
                     char currentChiffre = toupper(chiffre[i]);
                     if (currentChiffre < 'A' || currentChiffre > 'Z') { // Condition courtesy of Mr. GPT
                         std::ostringstream oss;
@@ -52,7 +59,7 @@ namespace EnigmaMachine {
 
             map<char , char> checkInternalWiringMap(std::map<char , char> wiring) const {
                 
-                if (wiring.size() != enigmaAllowedLetters.size()) {
+                if (wiring.size() != 26) {
                     std::ostringstream oss;
                     oss << "Error: wiring size does not match the Enigma-allowed characters list. Object at " << this;
                     throw std::runtime_error(oss.str());
@@ -105,16 +112,16 @@ namespace EnigmaMachine {
                 this->notchPlacement = notchPos;
             };
 
-            //the return value will determine if the rotor adjacent shall be rotated aswell
-            /*TODO: 
-            Actually on the second thought the rotation logic is a bit more complex than that.
-            Must determine a newer method
+            /*
+            A rotation is the rotation of the rotor towards the user in the enigma machine.
+            Althoug it is percieved that incrementing the position variable will rotate the rotor up, the reality is the quite contrary.
             */
-            void rotateForwards(){
+            bool rotate(){
                 this->position++;
                 if (this->position == 26) {
                     this->position = 0;
                 }
+                return this->position == this->notchPlacement;
             };
 
             map<char , char> getReverseWiring() const {
@@ -122,6 +129,7 @@ namespace EnigmaMachine {
                 for (int i = 0; i < 26; i++) {
                     reverseMap[intWiring.at(enigmaAllowedLetters[i])] = enigmaAllowedLetters[i];
                 }
+                return reverseMap;
             };
 
             char run(char character) const{
@@ -131,11 +139,11 @@ namespace EnigmaMachine {
                     oss << "Error: a non-Enigma-enabled value has been run through the rotor. Object at " << this;
                     throw std::runtime_error(oss.str());
                 }
-                return intWiring.at(character);
+                return this->intWiring.at(character);
             };
 
             char reverseRun(char character) const {
-                auto reverse = this->getReverseWiring();
+                map<char, char> reverse = this->getReverseWiring();
                 return reverse.at(character);
             };
 
@@ -146,7 +154,7 @@ namespace EnigmaMachine {
 
     };
     
-    class Reflector {
+    class Reflector { // I gather that inheritence would be an more efficent way to write this class but it is not worth the hassle
         private:
             const Bipair<char> wiring;
 
@@ -156,24 +164,50 @@ namespace EnigmaMachine {
                 if (chiffre.size() != 26) {
                     throw runtime_error("Error: Size of chiffre does not match 26");
                 }
-                for (int i = 0; i < 26; i++) {
+                for (int i = 0; i < 26 ; i++) {
                     bipair.addPair(enigmaAllowedLetters[i] , chiffre.at(i));
                 }
                 return bipair;
             };
+
+            Bipair<char> checkInternalWiringMap(Bipair<char> wiring) const {
+                
+                if (wiring.size() != 26) {
+                    std::ostringstream oss;
+                    oss << "Error: wiring size does not match the Enigma-allowed characters list. Object at " << this;
+                    throw std::runtime_error(oss.str());
+                }
+
+                for (const auto& pair : wiring.getPairs()) {
+                    if ((pair.first < 'A' || pair.first > 'Z') || (pair.second < 'A' || pair.second > 'Z')) {
+                        std::ostringstream oss;
+                        oss << "Error: a non-Enigma-enabled value has been found in wiring while initializing a rotor. Object at " << this;
+                        throw std::runtime_error(oss.str());
+                    }
+                }
+                return wiring;
+            };
+
         public:
             Reflector() = default;
 
             Reflector(string chiffre) : wiring(createWiring(chiffre)) {};
 
-            Reflector(Bipair<char> wiring) : wiring(wiring) {};
+            Reflector(Bipair<char> wiring) : wiring(checkInternalWiringMap(wiring)) {};
 
             const Bipair<char>& getWiring() const {
                 return this->wiring;
             };
 
             char run(char character) const {
-                return this->wiring.getCorrespondant(character);
+                // This is unneeded as the reflector input comes frım an Enigma element.
+                // if ((character < 'A') || (character > 'Z')) {
+                //     std::ostringstream oss;
+                //     oss << "Error: a non-Enigma-enabled value has been run through the reflector. Object at " << this;
+                //     throw std::runtime_error(oss.str());
+                // }
+                
+                return (this->wiring.checkElementExistence(character) ? this->wiring.getCorrespondant(character) : character);
             };
 
     };
@@ -189,7 +223,7 @@ namespace EnigmaMachine {
 
             void addConnection(pair<char , char> pair) {
 
-                if (connections.length() == maximumConnections) {
+                if (connections.size() == maximumConnections) {
                     throw runtime_error("Error: Maximum number of connections reached.");
                 }
 
@@ -201,7 +235,7 @@ namespace EnigmaMachine {
             }; 
 
             int getConnectionNumber() const {
-                return connections.length();
+                return connections.size();
             };
 
             int getMaximumConnections() const {
@@ -216,7 +250,8 @@ namespace EnigmaMachine {
             };
 
             char run(char character) const {
-                if (connections.checkElementExistence(character, character)) {
+                // Error here FAULTY CODE
+                if (connections.checkPairExistence(character, character)) {
                     return connections.getCorrespondant(character);
                 } else {
                     return character;
@@ -264,6 +299,12 @@ namespace EnigmaMachine {
                 }
             };
 
+            /*
+            Important formula: ===================================================================
+            rotor_input = previous_rotor_exit - previous_rotor_position + current_rotor_position
+            where these are calculated as integers mapped from A to Z
+            Not sure if A should start from 0 or 1 yet in theory is shan't matter.
+            =====================================================================================*/
             char encrypt(char character) {
 
             };

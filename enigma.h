@@ -22,6 +22,7 @@ namespace EnigmaMachine {
     */
     const std::string enigmaAllowedLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+    const std::map<char, int> enigmaLetterToIndex = {{'A', 0}, {'B', 1}, {'C', 2}, {'D', 3}, {'E', 4}, {'F', 5}, {'G', 6}, {'H', 7}, {'I', 8}, {'J', 9}, {'K', 10}, {'L', 11}, {'M', 12}, {'N', 13}, {'O', 14}, {'P', 15}, {'Q', 16}, {'R', 17}, {'S', 18}, {'T', 19}, {'U', 20}, {'V', 21}, {'W', 22}, {'X', 23}, {'Y', 24}, {'Z', 25}};
     /** 
     *Class simulating the rotorrotorss of an Enigma Machine.
     */
@@ -80,7 +81,7 @@ namespace EnigmaMachine {
             Increments rotor position by one.
             If the return value is true, that means the notch has passed and the left adjacent motor must be rotated.
             */
-            bool rotateForwards();
+            bool rotate();
 
             //Retuns the reverse wiring of the motor (key and value of the intWiring reversed).
             const std::map<char , char> getReverseWiring() const;

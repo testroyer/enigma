@@ -42,7 +42,7 @@ class Bipair {
         }
         
         void addPair(const T& first, const T& second) {
-            if (checkElementExistence(first , second)) { return; }
+            if (checkPairExistence(first , second)) { return; }
             pairs.emplace_back(first, second);
         };
 
@@ -56,13 +56,19 @@ class Bipair {
             return pairs;
         }
         
-        bool checkElementExistence(const T& first, const T& second) const {
+        bool checkPairExistence(const T& first, const T& second) const {
             return pairs.end() != std::find_if(pairs.begin() , pairs.end() , [&first , &second](const auto& p){
                 return (p.first == first || p.second == first) || (p.first == second || p.second == second);
             }); 
         };
 
-        int length() const {
+        bool checkElementExistence(const T& element) const {
+            return pairs.end() != std::find_if(pairs.begin() , pairs.end() , [&element](const auto& p){
+                return p.first == element || p.second == element;
+            }); 
+        };
+
+        int size() const {
             return pairs.size();
         }; 
 
