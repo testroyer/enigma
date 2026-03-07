@@ -11,13 +11,16 @@
 
 /// @todo: doxygen comments
 
+/*
+Note: Enigma Machine works only by capital letters so lowercase letters are transformed into uppercase implicitly
+*/
 namespace EnigmaMachine {
     
     /** 
     * char[27] enigmaAllowedLetters: List of enigma enabled Latin characters
     * 
     */
-    const char enigmaAllowedLetters[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const std::string enigmaAllowedLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     /** 
     *Class simulating the rotorrotorss of an Enigma Machine.
@@ -39,6 +42,11 @@ namespace EnigmaMachine {
             Chiffre is a 26 char string. One by one it is maped to the enigma allowed lettres. ("A" -> [0] , "B" -> [1] and so o and so on).
             */
             std::map<char, char> createInternalWiringMap(std::string chiffre); 
+
+            /*
+            Checks if the wiring map is valid. It must contain 26 entries and all keys and values must be in the enigmaAllowedLetters list.
+            */
+            std::map<char , char> checkInternalWiringMap(std::map<char , char> wiring) const;
 
         public:
 
@@ -197,13 +205,13 @@ namespace EnigmaMachine {
             */
             Enigma(std::initializer_list<std::string> rotorsChiffres, std::string reflectorChiffre, Bipair<char> initialPlugboard);
 
+            // Encryption of a single char character. The result is returned as a char.
+            char encrypt(char character);
+
             /*
             Encryption of a string message. The message is encrypted char by char and the result is returned as a string.
             */
             std::string encrypt(std::string message);
-
-            // Encryption of a single char character. The result is returned as a char.
-            char encrypt(char character);
 
             // Returns the size of the rotors vector.
             int getRotorCount() const;

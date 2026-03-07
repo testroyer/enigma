@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <utility>
 #include <map>
+#include <cctype>
+#include <sstream>
 
 using namespace std;
 
@@ -15,11 +17,13 @@ namespace EnigmaMachine {
     //TODO: Check this-> 'es
 
 
-    const char enigmaAllowedLetters[27] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const string enigmaAllowedLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     class Rotor {
         private:
-            int position; //[0,25]
+            //[0,25] 
+            // Actually it is the antirotation of the rotor. When it's one the Z is in A's place and so on. 
+            int position; 
             int notchPlacement; 
 
         protected:
@@ -29,32 +33,58 @@ namespace EnigmaMachine {
             
             //Chiffre means the order the the letters are cyrpted (For "ZASTQ..." , A->Z ,B->A and so on ) 
             map<char, char> createInternalWiringMap(string chiffre){
-                if (chiffre.size() != 26) {
+
+                if (chiffre.size() != enigmaAllowedLetters.size()) {
                    throw runtime_error("Error: Size of chiffre does not match 26"); //Could be more explicative maybe
                 }
-                for (int i = 0; i < 26; i++){
-                    intWiring[enigmaAllowedLetters[i]] = chiffre[i];
+
+                for (int i = 0; i < enigmaAllowedLetters.size() ; i++){
+                    char currentChiffre = toupper(chiffre[i]);
+                    if (currentChiffre < 'A' || currentChiffre > 'Z') { // Condition courtesy of Mr. GPT
+                        std::ostringstream oss;
+                        oss << "Error: a non-Enigma-enabled value has been found in chiffre (at index" << i << ") while initializing a rotor. Object at " << this;
+                        throw std::runtime_error(oss.str());
+                    }
+                    this->intWiring[enigmaAllowedLetters[i]] = currentChiffre;
                 }
                 return this->intWiring; //Return value just-in-case
             }; 
+
+            map<char , char> checkInternalWiringMap(std::map<char , char> wiring) const {
+                
+                if (wiring.size() != enigmaAllowedLetters.size()) {
+                    std::ostringstream oss;
+                    oss << "Error: wiring size does not match the Enigma-allowed characters list. Object at " << this;
+                    throw std::runtime_error(oss.str());
+                }
+
+                for (const auto& pair : wiring) {
+                    if ((pair.first < 'A' || pair.first > 'Z') || (pair.second < 'A' || pair.second > 'Z')) {
+                        std::ostringstream oss;
+                        oss << "Error: a non-Enigma-enabled value has been found in wiring while initializing a rotor. Object at " << this;
+                        throw std::runtime_error(oss.str());
+                    }
+                }
+                return wiring;
+            };
 
         public:
             Rotor() = default;
             
             Rotor(string chiffre, int startPosition = 0, int notchPlacement = 0) 
                 : intWiring(createInternalWiringMap(chiffre)), 
-                position(startPosition), 
-                notchPlacement(notchPlacement) 
+                position(((startPosition >= 0) && (startPosition <= 25)) ? startPosition : startPosition % 26), 
+                notchPlacement(((notchPlacement >= 0) && (notchPlacement <= 25)) ? notchPlacement : notchPlacement % 26) 
             {};
 
             Rotor(map<char , char>& wiring, int startPosition = 0, int notchPlacement = 0) 
-                : intWiring(wiring), 
-                position(startPosition), 
-                notchPlacement(notchPlacement) 
+                : intWiring(checkInternalWiringMap(wiring)), 
+                position(((startPosition >= 0) && (startPosition <= 25)) ? startPosition : startPosition % 26), 
+                notchPlacement(((notchPlacement >= 0) && (notchPlacement <= 25)) ? notchPlacement : notchPlacement % 26) 
             {};
 
             void setPosition(int pos){
-                if ((pos > 25) || pos < 0) {
+                if ((pos < 0) || (pos > 25)) {
                     throw runtime_error("Error: Position of a rotor must be an integer within [0 , 25]");
                 }
                 this->position = pos;
@@ -67,13 +97,24 @@ namespace EnigmaMachine {
             int getNotchPosition() const{
                 return this->notchPlacement;
             };
-            void setNotchPosition();
+
+            void setNotchPosition(int notchPos) {
+                if ((notchPos < 0) || (notchPos > 25)) {
+                    throw runtime_error("Error: Notch position of a rotor must be an integer within [0 , 25]");
+                }
+                this->notchPlacement = notchPos;
+            };
 
             //the return value will determine if the rotor adjacent shall be rotated aswell
-            bool rotateForwards(){
-                bool notchIsOn = (this->notchPlacement == this->position);
+            /*TODO: 
+            Actually on the second thought the rotation logic is a bit more complex than that.
+            Must determine a newer method
+            */
+            void rotateForwards(){
                 this->position++;
-                return notchIsOn;
+                if (this->position == 26) {
+                    this->position = 0;
+                }
             };
 
             map<char , char> getReverseWiring() const {
@@ -84,6 +125,12 @@ namespace EnigmaMachine {
             };
 
             char run(char character) const{
+                character = toupper(character);
+                if (enigmaAllowedLetters.find(character) == string::npos) {
+                    std::ostringstream oss;
+                    oss << "Error: a non-Enigma-enabled value has been run through the rotor. Object at " << this;
+                    throw std::runtime_error(oss.str());
+                }
                 return intWiring.at(character);
             };
 
@@ -217,9 +264,11 @@ namespace EnigmaMachine {
                 }
             };
 
-            //Here ===============================================================================================================
+            char encrypt(char character) {
+
+            };
+
             string encrypt(string message);
-            char encrypt(char character);
 
             int getRotorCount() const {
                 return this->rotors.size();
