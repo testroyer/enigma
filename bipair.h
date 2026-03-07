@@ -28,7 +28,7 @@ class Bipair {
         Bipair() = default;
         Bipair (const std::vector<std::pair<T, T>>& initialPairs) {
             if (initialHasDoublePairing(initialPairs)) {
-                throw std::runtime_error("Initial pairs contain duplicate elements.");
+                throw std::runtime_error("Initial pairs of Bipair construction contain duplicate elements.");
             }
             pairs = initialPairs;
         };
@@ -36,7 +36,7 @@ class Bipair {
             
             std::vector<std::pair<T, T>> vectorPairs(initialPairs);
             if (initialHasDoublePairing(initialPairs)) {
-                throw std::runtime_error("Initial pairs contain duplicate elements.");
+                throw std::runtime_error("Initial pairs of Bipair construction contain duplicate elements.");
             }
             pairs = initialPairs;
         }

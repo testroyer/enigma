@@ -219,23 +219,41 @@ namespace EnigmaMachine {
         public:
             Plugboard() = default;
 
-            Plugboard(const Bipair<char>& plugboardWiring) : connections(plugboardWiring), maximumConnections(10) {};
+            Plugboard(const Bipair<char>& plugboardWiring) :  maximumConnections(13) { // Set to 13 by default. (Hard Coded)
+                if (plugboardWiring.size() > 13) {
+                    throw runtime_error("Error: tried to construct a plugboard with more than phyically possible connections");
+                }
+                this->connections = plugboardWiring;
+            };
 
+            Plugboard(const Bipair<char>& plugboardWiring  , int maximumConnections) {
+                if (maximumConnections > 13) {
+                    throw runtime_error("Error: tried to set maximumConnections beyond the pysical limit.");
+                }
+                this->maximumConnections = maximumConnections;
+
+                if (plugboardWiring.size() > 13) {
+                    throw runtime_error("Error: tried to construct a plugboard with more than phyically possible connections");
+                }
+                this->connections = plugboardWiring;
+            };
+
+            // Here
             void addConnection(pair<char , char> pair) {
 
                 if (connections.size() == maximumConnections) {
                     throw runtime_error("Error: Maximum number of connections reached.");
                 }
 
-                connections.addPair(pair.first, pair.second);
+                this->connections.addPair(pair.first, pair.second);
             };
 
             void removeConnection(pair<char , char> pair) {
-                connections.removePair(pair.first, pair.second);
+                this->connections.removePair(pair.first, pair.second);
             }; 
 
             int getConnectionNumber() const {
-                return connections.size();
+                return this->connections.size();
             };
 
             int getMaximumConnections() const {
@@ -243,8 +261,12 @@ namespace EnigmaMachine {
             };
 
             void setMaximumConenctions(int newMax) {
+                if (newMax < 0) {
+                    throw runtime_error("Error: number of maximum connections on the plugboard may not be set to a negative value");
+                }
                 this->maximumConnections = newMax;
             };
+
             const Bipair<char>& getConnections() const {
                 return this->connections;
             };
@@ -257,7 +279,6 @@ namespace EnigmaMachine {
                     return character;
                 }
             };
-            // get reverse connection ?
     };
 
     class Enigma {

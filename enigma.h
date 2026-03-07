@@ -146,8 +146,14 @@ namespace EnigmaMachine {
 
             /*
             Plugboard constructor by a Bipair object.
+            Auto-assumes the maximum connections as 13 (max physically possible.)
             */
             Plugboard(const Bipair<char>& plugboardWiring);
+
+            /*
+            Plugboard constructor by a Bipair object and int maximumConnections.
+            */
+            Plugboard(const Bipair<char>& plugboardWiring  , int maximumConnections);
 
             // Adds a connection to the plugboard if the maximum connection number won't be passed and both plugs are free.
             void addConnection(std::pair<char , char> pair);
