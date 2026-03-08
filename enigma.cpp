@@ -14,6 +14,8 @@ namespace EnigmaMachine {
     // Every class has two ctors, one that ctors with built objects and one that ctors with initializer lists. 
     // The value 26 is usually hard coded for enigmaAllowedLetters.size();
     //TODO: String ctors, chiffres and runs along with chars
+    //TODO: Iter increments
+    //TODO: AIACC Fixes
 
     #pragma region Enigma-allowed characters and related functions
     
@@ -35,6 +37,7 @@ namespace EnigmaMachine {
     }
     #pragma endregion
 
+    #pragma region Auxilary class definitions
     class Rotor {
         private:
             //[0,25] 
@@ -97,7 +100,7 @@ namespace EnigmaMachine {
                 notchPlacement(((notchPlacement >= 0) && (notchPlacement <= 25)) ? notchPlacement : notchPlacement % 26) 
             {};
 
-            Rotor(map<char , char>& wiring, int startPosition = 0, int notchPlacement = 0) 
+            Rotor(const map<char , char>& wiring, int startPosition = 0, int notchPlacement = 0) 
                 : intWiring(checkInternalWiringMap(wiring)), 
                 position(((startPosition >= 0) && (startPosition <= 25)) ? startPosition : startPosition % 26), 
                 notchPlacement(((notchPlacement >= 0) && (notchPlacement <= 25)) ? notchPlacement : notchPlacement % 26) 
@@ -305,6 +308,7 @@ namespace EnigmaMachine {
                 }
             };
     };
+    #pragma endregion
 
     class Enigma {
         public:
@@ -369,8 +373,11 @@ namespace EnigmaMachine {
 
                 // Rotors first run
                 for (auto rotor = this->rotors.begin() ; rotor != this->rotors.end() ; rotor++) {
-                    // currentCharacterState = (*rotor).run(enigmaAllowedLetters[(enigmaLetterToIndex.at(currentCharacterState) - lastRotorPosition + (*rotor).getPosition()) < 0 ? ]);
-                    currentCharacterState = rotor->run(this->determineRotorInput(currentCharacterState , rotor->getPosition() , ( rotor != this->rotors.begin() ? (*(rotor-1)).getPosition() : 0)));
+                    currentCharacterState = rotor->run(this->determineRotorInput(
+                        currentCharacterState, 
+                        rotor->getPosition(), 
+                        (rotor != this->rotors.begin() ? (*(rotor-1)).getPosition() : 0)
+                    ));
                 }
                     
                 // Reflector run
@@ -378,14 +385,24 @@ namespace EnigmaMachine {
 
                 // Rotors (reverse) run
                 for (auto rotor = this->rotors.rbegin(); rotor != this->rotors.rend(); ++rotor) {
-                    currentCharacterState = rotor->reverseRun(this->determineRotorInput(currentCharacterState , rotor->getPosition() , (rotor != (this->rotors.rbegin()) ? (*(rotor-1)).getPosition() : 0)));
+                    currentCharacterState = rotor->reverseRun(this->determineRotorInput(
+                        currentCharacterState , 
+                        rotor->getPosition() , 
+                        (rotor != (this->rotors.rbegin()) ? (*(rotor-1)).getPosition() : 0)
+                    ));
                 }
 
                 // Last plugbaord run
                 currentCharacterState = this->plugboard.run(currentCharacterState);
 
 
-                //HERE ROTATE LOGIC
+                // Rotate logic
+                for (auto rotor = rotors.begin() ; rotor != rotors.end() ; ++rotor) {
+                    bool rotateNext = rotor->rotate();
+                    if (!rotateNext) { // If the current rotor doesn't cause the next one to rotate or if it is the last rotor,
+                        break;
+                    }
+                }
 
                return currentCharacterState;
 

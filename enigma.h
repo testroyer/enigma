@@ -53,7 +53,7 @@ namespace EnigmaMachine {
             /*
             Checks if the wiring map is valid. It must contain 26 entries and all keys and values must be in the enigmaAllowedLetters list.
             */
-            std::map<char , char> checkInternalWiringMap(std::map<char , char> wiring) const;
+            std::map<char , char> checkInternalWiringMap(const std::map<char , char> wiring) const;
 
         public:
 
