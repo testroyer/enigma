@@ -42,7 +42,9 @@ class Bipair {
         }
         
         void addPair(const T& first, const T& second) {
-            if (checkPairExistence(first , second)) { return; }
+            if (checkPairExistence(first , second)) { 
+                throw std::runtime_error("Error: Attempting to add a pair that contains an element that already exists in another pair.");
+            }
             pairs.emplace_back(first, second);
         };
 

@@ -18,6 +18,8 @@ namespace EnigmaMachine {
     //TODO: Check this-> 'es
 
     #pragma region Enigma-allowed characters and related functions
+    
+    // enigmaAllowedLetters(i) = enigmaLetterToIndex^-1(i)
     const string enigmaAllowedLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     const map<char, int> enigmaLetterToIndex = {{'A', 0}, {'B', 1}, {'C', 2}, {'D', 3}, {'E', 4}, {'F', 5}, {'G', 6}, {'H', 7}, {'I', 8}, {'J', 9}, {'K', 10}, {'L', 11}, {'M', 12}, {'N', 13}, {'O', 14}, {'P', 15}, {'Q', 16}, {'R', 17}, {'S', 18}, {'T', 19}, {'U', 20}, {'V', 21}, {'W', 22}, {'X', 23}, {'Y', 24}, {'Z', 25}};
@@ -63,6 +65,11 @@ namespace EnigmaMachine {
                 for (int i = 0; i < 26 ; i++){
                     char currentChiffre = toupper(chiffre[i]);
                     checkAndThrowIfNotEnigmaEnabledChar(currentChiffre, this); 
+                    if (this->intWiring.find(currentChiffre) != this->intWiring.end()) {
+                        std::ostringstream oss;
+                        oss << "Error: duplicate character in chiffre while initializing. Object at " << this;
+                        throw std::runtime_error(oss.str());
+                    }
                     this->intWiring[enigmaAllowedLetters[i]] = currentChiffre;
                 }
                 return this->intWiring; //Return value just-in-case
@@ -133,6 +140,7 @@ namespace EnigmaMachine {
             };
 
             map<char , char> getReverseWiring() const {
+                //No need to check here as it is from the object itself.
                 map<char, char> reverseMap;
                 for (int i = 0; i < 26; i++) {
                     reverseMap[this->intWiring.at(enigmaAllowedLetters[i])] = enigmaAllowedLetters[i];
@@ -160,7 +168,8 @@ namespace EnigmaMachine {
 
     };
     
-    class Reflector { // I gather that inheritence would be an more efficent way to write this class but it is not worth the hassle
+    class Reflector { 
+        // I gather that inheritence would be an more efficent way to write this class but it is not worth the hassle
         private:
             const Bipair<char> wiring;
 
@@ -171,7 +180,9 @@ namespace EnigmaMachine {
                     throw runtime_error("Error: Size of chiffre does not match 26");
                 }
                 for (int i = 0; i < 26 ; i++) {
-                    bipair.addPair(enigmaAllowedLetters[i] , chiffre.at(i));
+                    char currentChiffre = toupper(chiffre[i]);
+                    checkAndThrowIfNotEnigmaEnabledChar(currentChiffre, this);
+                    bipair.addPair(enigmaAllowedLetters[i] , currentChiffre);
                 }
                 return bipair;
             };
@@ -205,7 +216,10 @@ namespace EnigmaMachine {
             char run(char character) const {
                 character = toupper(character);
                 checkAndThrowIfNotEnigmaEnabledChar(character, this);   
-                return (this->wiring.checkElementExistence(character) ? this->wiring.getCorrespondant(character) : character);
+                if (!this->wiring.checkElementExistence(character))  {
+                    throw runtime_error("Error: character not found in reflector wiring, most likely due to false initialization");
+                }
+                return this->wiring.getCorrespondant(character);
             };
 
     };
@@ -253,7 +267,7 @@ namespace EnigmaMachine {
             };
 
             void removeConnection(pair<char , char> pair) {
-                //This bit is a bit boilerplate-ish but making it a function is not worth the hassle
+                //This bit is a bit boilerplate-ish but making it a function is not worth the hassle.
                 char first = toupper(pair.first);
                 char second = toupper(pair.second);
                 checkAndThrowIfNotEnigmaEnabledChar(first, this);
@@ -284,7 +298,8 @@ namespace EnigmaMachine {
             };
 
             char run(char character) const {
-
+                character = toupper(character); 
+                checkAndThrowIfNotEnigmaEnabledChar(character, this);
                 if (this->connections.checkElementExistence(character)) {
                     return this->connections.getCorrespondant(character);
                 } else {
