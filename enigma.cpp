@@ -14,8 +14,8 @@ namespace EnigmaMachine {
     // Every class has two ctors, one that ctors with built objects and one that ctors with initializer lists. 
     // The value 26 is usually hard coded for enigmaAllowedLetters.size();
     //TODO: String ctors, chiffres and runs along with chars
-    //TODO check int comparizons lengths value domains etc.
     //TODO: Check this-> 'es
+    //TODO: noexcept specifiers
 
     #pragma region Enigma-allowed characters and related functions
     
@@ -309,7 +309,6 @@ namespace EnigmaMachine {
     };
 
     class Enigma {
-        private: 
         public:
 
             vector<Rotor> rotors;
@@ -369,6 +368,9 @@ namespace EnigmaMachine {
                 }
 
                 for (int i = 0; i < this->rotors.size(); i++) {
+                    if (positions[i] < 0 || positions[i] > 25) {
+                        throw runtime_error("Error: rotor positions must be integers within [0 , 25].");
+                    }
                     this->rotors[i].setPosition(positions[i]);
                 }
 
@@ -381,7 +383,11 @@ namespace EnigmaMachine {
                 }
 
                 for (int i = 0; i < this->rotors.size(); i++) {
-                    this->rotors[i].setPosition(*(positions.begin()+i));
+                    int currentPosition = *(positions.begin()+i);
+                    if (currentPosition < 0 || currentPosition > 25) {
+                        throw runtime_error("Error: rotor positions must be integers within [0 , 25].");
+                    }
+                    this->rotors[i].setPosition(currentPosition);
                 }
 
             }
