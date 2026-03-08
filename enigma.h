@@ -25,7 +25,7 @@ namespace EnigmaMachine {
     const std::map<char, int> enigmaLetterToIndex = {{'A', 0}, {'B', 1}, {'C', 2}, {'D', 3}, {'E', 4}, {'F', 5}, {'G', 6}, {'H', 7}, {'I', 8}, {'J', 9}, {'K', 10}, {'L', 11}, {'M', 12}, {'N', 13}, {'O', 14}, {'P', 15}, {'Q', 16}, {'R', 17}, {'S', 18}, {'T', 19}, {'U', 20}, {'V', 21}, {'W', 22}, {'X', 23}, {'Y', 24}, {'Z', 25}};
 
     //Check if the character is an enigma-enabled character
-    bool checkIfEngimaEnabledChar(char character);
+    bool checkIfEngimaEnabledChar(char character) noexcept;
 
     void checkAndThrowIfNotEnigmaEnabledChar(char character, const void* objectAddress);
 
@@ -75,10 +75,10 @@ namespace EnigmaMachine {
             void setPosition(int pos);
 
             // Gets int position porperty.
-            int getPosition() const;
+            int getPosition() const noexcept;
 
             // Gets int notchPosition porperty.
-            int getNotchPosition() const;
+            int getNotchPosition() const noexcept;
 
             // Sets int notchPosition porperty.
             void setNotchPosition();
@@ -87,7 +87,7 @@ namespace EnigmaMachine {
             Increments rotor position by one.
             If the return value is true, that means the notch has passed and the left adjacent motor must be rotated.
             */
-            bool rotate();
+            bool rotate() noexcept;
 
             //Retuns the reverse wiring of the motor (key and value of the intWiring reversed).
             const std::map<char , char> getReverseWiring() const;
@@ -127,7 +127,7 @@ namespace EnigmaMachine {
             Reflector(Bipair<char> wiring);
 
             // Returns const Bipair<char> wiring object.
-            const Bipair<char>& getWiring() const;
+            const Bipair<char>& getWiring() const noexcept;
 
             //Runs a char character through the reflector and returns the result as a char.
             char run(char character) const;
@@ -168,16 +168,16 @@ namespace EnigmaMachine {
             void removeConnection(std::pair<char , char> pair);
             
             //Gets the number of present connections.
-            int getConnectionNumber() const;
+            int getConnectionNumber() const noexcept;
 
             //Gets the current number for maximum amount of connections.
-            int getMaximumConnections() const;
+            int getMaximumConnections() const noexcept;
 
             //Sets the current number for maximum amount of connections.
             void setMaximumConenctions(int newMax);
             
             //Returns the Bipair<char> connections property.
-            const Bipair<char>& getConnections() const;
+            const Bipair<char>& getConnections() const noexcept;
 
             //Runs a letter through the plugboard and returns the result as a char.
             char run(char character) const;
@@ -227,7 +227,7 @@ namespace EnigmaMachine {
             std::string encrypt(std::string message);
 
             // Returns the size of the rotors vector.
-            int getRotorCount() const;
+            int getRotorCount() const noexcept;
 
             /*
             Set the orientation of the rotors by a vector of integers starting from the rightmost rotor.

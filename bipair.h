@@ -16,6 +16,9 @@ class Bipair {
             //TODO: Check if the pair is of same data type.
             std::unordered_set<T> elements;
             for (const auto& p : initialPairs) {
+                if (decltype(p.first) != decltype(p.second)) {
+                    throw std::runtime_error("Error: Pair elements must be of the same data type.");
+                }
                 if (elements.insert(p.first).second == false || elements.insert(p.second).second == false) {
                     return true; // Found a duplicate element
                 }
@@ -70,7 +73,7 @@ class Bipair {
             }); 
         };
 
-        int size() const {
+        int size() const noexcept {
             return pairs.size();
         }; 
 

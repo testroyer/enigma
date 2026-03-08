@@ -14,8 +14,6 @@ namespace EnigmaMachine {
     // Every class has two ctors, one that ctors with built objects and one that ctors with initializer lists. 
     // The value 26 is usually hard coded for enigmaAllowedLetters.size();
     //TODO: String ctors, chiffres and runs along with chars
-    //TODO: Check this-> 'es
-    //TODO: noexcept specifiers
 
     #pragma region Enigma-allowed characters and related functions
     
@@ -24,7 +22,7 @@ namespace EnigmaMachine {
 
     const map<char, int> enigmaLetterToIndex = {{'A', 0}, {'B', 1}, {'C', 2}, {'D', 3}, {'E', 4}, {'F', 5}, {'G', 6}, {'H', 7}, {'I', 8}, {'J', 9}, {'K', 10}, {'L', 11}, {'M', 12}, {'N', 13}, {'O', 14}, {'P', 15}, {'Q', 16}, {'R', 17}, {'S', 18}, {'T', 19}, {'U', 20}, {'V', 21}, {'W', 22}, {'X', 23}, {'Y', 24}, {'Z', 25}};
 
-    bool checkIfEngimaEnabledChar(char character) {
+    bool checkIfEngimaEnabledChar(char character) noexcept {
         return ((character >= 'A' && character <= 'Z') && isupper(character));
     }
 
@@ -112,11 +110,11 @@ namespace EnigmaMachine {
                 this->position = pos;
             };
             
-            int getPosition() const {
+            int getPosition() const noexcept {
                 return this->position;
             };
 
-            int getNotchPosition() const{
+            int getNotchPosition() const noexcept {
                 return this->notchPlacement;
             };
 
@@ -131,7 +129,7 @@ namespace EnigmaMachine {
             A rotation is the rotation of the rotor towards the user in the enigma machine.
             Although it is percieved that incrementing the position variable will rotate the rotor up, the reality is the quite contrary.
             */
-            bool rotate(){
+            bool rotate() noexcept{
                 this->position++;
                 if (this->position == 26) {
                     this->position = 0;
@@ -209,7 +207,7 @@ namespace EnigmaMachine {
 
             Reflector(Bipair<char> wiring) : wiring(checkInternalWiringMap(wiring)) {};
 
-            const Bipair<char>& getWiring() const {
+            const Bipair<char>& getWiring() const noexcept {
                 return this->wiring;
             };
 
@@ -275,11 +273,11 @@ namespace EnigmaMachine {
                 this->connections.removePair(pair.first, pair.second);
             }; 
 
-            int getConnectionNumber() const {
+            int getConnectionNumber() const noexcept {
                 return this->connections.size();
             };
 
-            int getMaximumConnections() const {
+            int getMaximumConnections() const noexcept {
                 return this->maximumConnections;
             };
 
@@ -293,7 +291,7 @@ namespace EnigmaMachine {
                 this->maximumConnections = newMax;
             };
 
-            const Bipair<char>& getConnections() const {
+            const Bipair<char>& getConnections() const noexcept {
                 return this->connections;
             };
 
@@ -358,7 +356,7 @@ namespace EnigmaMachine {
 
             string encrypt(string message);
 
-            int getRotorCount() const {
+            int getRotorCount() const noexcept{
                 return this->rotors.size();
             };
 
