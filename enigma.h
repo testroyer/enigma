@@ -221,6 +221,10 @@ namespace EnigmaMachine {
             // Encryption of a single char character. The result is returned as a char.
             char encrypt(char character);
 
+
+            // Formula to determine which rotor output correlates to which rotor input.
+            char determineRotorInput(char character, Rotor& current, Rotor& previous) const;
+
             /*
             Encryption of a string message. The message is encrypted char by char and the result is returned as a string.
             */

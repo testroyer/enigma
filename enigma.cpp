@@ -347,14 +347,65 @@ namespace EnigmaMachine {
             /*
             Important formula: ===================================================================
             rotor_input = previous_rotor_exit - previous_rotor_position + current_rotor_position
+                          char(cast to int)   - int                     + int
             where these are calculated as integers mapped from A to Z
             Not sure if A should start from 0 or 1 yet in theory is shan't matter.
             =====================================================================================*/
             char encrypt(char character) {
+                if (character == ' ') {
+                    return character;
+                }
+                /*
+                Signal flow:
+                Input -> Plugboard -> Rotors[] -> Reflector -> Rotors[] (reverse) -> Plugboard -> Output 
+                */
+                char currentCharacterState = toupper(character); // Uppercase cast as needed
+                checkAndThrowIfNotEnigmaEnabledChar(currentCharacterState, this);
+
+                // Plugboard first run
+                currentCharacterState = this->plugboard.run(currentCharacterState); 
+
+                //TODO: Sperate the rotor assembly to a different function
+
+                // Rotors first run
+                for (auto rotor = this->rotors.begin() ; rotor != this->rotors.end() ; rotor++) {
+                    // currentCharacterState = (*rotor).run(enigmaAllowedLetters[(enigmaLetterToIndex.at(currentCharacterState) - lastRotorPosition + (*rotor).getPosition()) < 0 ? ]);
+                    currentCharacterState = rotor->run(this->determineRotorInput(currentCharacterState , rotor->getPosition() , ( rotor != this->rotors.begin() ? (*(rotor-1)).getPosition() : 0)));
+                }
+                    
+                // Reflector run
+                currentCharacterState = this->reflector.run(this->determineRotorInput(currentCharacterState, 0, this->rotors.back().getPosition()));
+
+                // Rotors (reverse) run
+                for (auto rotor = this->rotors.rbegin(); rotor != this->rotors.rend(); ++rotor) {
+                    currentCharacterState = rotor->reverseRun(this->determineRotorInput(currentCharacterState , rotor->getPosition() , (rotor != (this->rotors.rbegin()) ? (*(rotor-1)).getPosition() : 0)));
+                }
+
+                // Last plugbaord run
+                currentCharacterState = this->plugboard.run(currentCharacterState);
+
+
+                //HERE ROTATE LOGIC
+
+               return currentCharacterState;
 
             };
 
-            string encrypt(string message);
+            //Caution while calling this as the paramater and formula placement are mixed
+            char determineRotorInput(char character, int currentPos, int previousPos) const {
+                return enigmaAllowedLetters[(
+                    ((enigmaLetterToIndex.at(character) - previousPos + currentPos) % 26 + 26) % 26
+                    )];
+
+            }
+
+            string encrypt(string message) {
+                string result;
+                for (char& character : message) {
+                    result += this->encrypt(character);
+                }
+                return result;
+            };
 
             int getRotorCount() const noexcept{
                 return this->rotors.size();
