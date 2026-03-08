@@ -17,10 +17,23 @@ namespace EnigmaMachine {
     //TODO check int comparizons lengths value domains etc.
     //TODO: Check this-> 'es
 
-
+    #pragma region Enigma-allowed characters and related functions
     const string enigmaAllowedLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     const map<char, int> enigmaLetterToIndex = {{'A', 0}, {'B', 1}, {'C', 2}, {'D', 3}, {'E', 4}, {'F', 5}, {'G', 6}, {'H', 7}, {'I', 8}, {'J', 9}, {'K', 10}, {'L', 11}, {'M', 12}, {'N', 13}, {'O', 14}, {'P', 15}, {'Q', 16}, {'R', 17}, {'S', 18}, {'T', 19}, {'U', 20}, {'V', 21}, {'W', 22}, {'X', 23}, {'Y', 24}, {'Z', 25}};
+
+    bool checkIfEngimaEnabledChar(char character) {
+        return ((character >= 'A' && character <= 'Z') && isupper(character));
+    }
+
+    void checkAndThrowIfNotEnigmaEnabledChar(char character, const void* objectAddress) {
+            if (!checkIfEngimaEnabledChar(character)) { // Condition courtesy of Mr. GPT
+                std::ostringstream oss;
+                oss << "Error: a non-Enigma-enabled value has been found while initializing. Object at " << objectAddress;
+                throw std::runtime_error(oss.str());
+            }
+    }
+    #pragma endregion
 
     class Rotor {
         private:
@@ -42,16 +55,14 @@ namespace EnigmaMachine {
             map<char, char> createInternalWiringMap(string chiffre){
 
                 if (chiffre.size() != 26) {
-                   throw runtime_error("Error: Size of chiffre does not match 26"); //Could be more explicative maybe
+                    std::ostringstream oss;
+                    oss << "Error: Size of chiffre does not match 26 while initializing. Object at " << this;
+                    throw std::runtime_error(oss.str());
                 }
 
                 for (int i = 0; i < 26 ; i++){
                     char currentChiffre = toupper(chiffre[i]);
-                    if (currentChiffre < 'A' || currentChiffre > 'Z') { // Condition courtesy of Mr. GPT
-                        std::ostringstream oss;
-                        oss << "Error: a non-Enigma-enabled value has been found in chiffre (at index" << i << ") while initializing a rotor. Object at " << this;
-                        throw std::runtime_error(oss.str());
-                    }
+                    checkAndThrowIfNotEnigmaEnabledChar(currentChiffre, this); 
                     this->intWiring[enigmaAllowedLetters[i]] = currentChiffre;
                 }
                 return this->intWiring; //Return value just-in-case
@@ -66,11 +77,8 @@ namespace EnigmaMachine {
                 }
 
                 for (const auto& pair : wiring) {
-                    if ((pair.first < 'A' || pair.first > 'Z') || (pair.second < 'A' || pair.second > 'Z')) {
-                        std::ostringstream oss;
-                        oss << "Error: a non-Enigma-enabled value has been found in wiring while initializing a rotor. Object at " << this;
-                        throw std::runtime_error(oss.str());
-                    }
+                    checkAndThrowIfNotEnigmaEnabledChar(pair.first, this);
+                    checkAndThrowIfNotEnigmaEnabledChar(pair.second, this);
                 }
                 return wiring;
             };
@@ -114,7 +122,7 @@ namespace EnigmaMachine {
 
             /*
             A rotation is the rotation of the rotor towards the user in the enigma machine.
-            Althoug it is percieved that incrementing the position variable will rotate the rotor up, the reality is the quite contrary.
+            Although it is percieved that incrementing the position variable will rotate the rotor up, the reality is the quite contrary.
             */
             bool rotate(){
                 this->position++;
@@ -127,22 +135,20 @@ namespace EnigmaMachine {
             map<char , char> getReverseWiring() const {
                 map<char, char> reverseMap;
                 for (int i = 0; i < 26; i++) {
-                    reverseMap[intWiring.at(enigmaAllowedLetters[i])] = enigmaAllowedLetters[i];
+                    reverseMap[this->intWiring.at(enigmaAllowedLetters[i])] = enigmaAllowedLetters[i];
                 }
                 return reverseMap;
             };
 
             char run(char character) const{
                 character = toupper(character);
-                if (enigmaAllowedLetters.find(character) == string::npos) {
-                    std::ostringstream oss;
-                    oss << "Error: a non-Enigma-enabled value has been run through the rotor. Object at " << this;
-                    throw std::runtime_error(oss.str());
-                }
+                checkAndThrowIfNotEnigmaEnabledChar(character, this);
                 return this->intWiring.at(character);
             };
 
             char reverseRun(char character) const {
+                character = toupper(character);
+                checkAndThrowIfNotEnigmaEnabledChar(character, this);
                 map<char, char> reverse = this->getReverseWiring();
                 return reverse.at(character);
             };
@@ -179,11 +185,8 @@ namespace EnigmaMachine {
                 }
 
                 for (const auto& pair : wiring.getPairs()) {
-                    if ((pair.first < 'A' || pair.first > 'Z') || (pair.second < 'A' || pair.second > 'Z')) {
-                        std::ostringstream oss;
-                        oss << "Error: a non-Enigma-enabled value has been found in wiring while initializing a rotor. Object at " << this;
-                        throw std::runtime_error(oss.str());
-                    }
+                    checkAndThrowIfNotEnigmaEnabledChar(pair.first, this);
+                    checkAndThrowIfNotEnigmaEnabledChar(pair.second, this);
                 }
                 return wiring;
             };
@@ -200,13 +203,8 @@ namespace EnigmaMachine {
             };
 
             char run(char character) const {
-                // This is unneeded as the reflector input comes frım an Enigma element.
-                // if ((character < 'A') || (character > 'Z')) {
-                //     std::ostringstream oss;
-                //     oss << "Error: a non-Enigma-enabled value has been run through the reflector. Object at " << this;
-                //     throw std::runtime_error(oss.str());
-                // }
-                
+                character = toupper(character);
+                checkAndThrowIfNotEnigmaEnabledChar(character, this);   
                 return (this->wiring.checkElementExistence(character) ? this->wiring.getCorrespondant(character) : character);
             };
 
@@ -221,27 +219,33 @@ namespace EnigmaMachine {
 
             Plugboard(const Bipair<char>& plugboardWiring) :  maximumConnections(13) { // Set to 13 by default. (Hard Coded)
                 if (plugboardWiring.size() > 13) {
-                    throw runtime_error("Error: tried to construct a plugboard with more than phyically possible connections");
+                    throw runtime_error("Error: tried to intialize a plugboard with more than phyically possible connections");
                 }
                 this->connections = plugboardWiring;
             };
 
             Plugboard(const Bipair<char>& plugboardWiring  , int maximumConnections) {
+                if (maximumConnections < 0) {
+                    throw runtime_error("Error: number of maximum connections on the plugboard may not be set to a negative value");
+                }
                 if (maximumConnections > 13) {
-                    throw runtime_error("Error: tried to set maximumConnections beyond the pysical limit.");
+                    throw runtime_error("Error: number of maximum connections on the plugboard may not be set beyond the physical limit.");
                 }
                 this->maximumConnections = maximumConnections;
 
                 if (plugboardWiring.size() > 13) {
-                    throw runtime_error("Error: tried to construct a plugboard with more than phyically possible connections");
+                    throw runtime_error("Error: tried to initialize a plugboard with more than phyically possible connections");
                 }
                 this->connections = plugboardWiring;
             };
 
-            // Here
             void addConnection(pair<char , char> pair) {
+                char first = toupper(pair.first);
+                char second = toupper(pair.second);
+                checkAndThrowIfNotEnigmaEnabledChar(first, this);
+                checkAndThrowIfNotEnigmaEnabledChar(second, this);
 
-                if (connections.size() == maximumConnections) {
+                if (this->connections.size() == maximumConnections) {
                     throw runtime_error("Error: Maximum number of connections reached.");
                 }
 
@@ -249,6 +253,11 @@ namespace EnigmaMachine {
             };
 
             void removeConnection(pair<char , char> pair) {
+                //This bit is a bit boilerplate-ish but making it a function is not worth the hassle
+                char first = toupper(pair.first);
+                char second = toupper(pair.second);
+                checkAndThrowIfNotEnigmaEnabledChar(first, this);
+                checkAndThrowIfNotEnigmaEnabledChar(second, this);
                 this->connections.removePair(pair.first, pair.second);
             }; 
 
@@ -264,6 +273,9 @@ namespace EnigmaMachine {
                 if (newMax < 0) {
                     throw runtime_error("Error: number of maximum connections on the plugboard may not be set to a negative value");
                 }
+                if (newMax > 13) {
+                    throw runtime_error("Error: number of maximum connections on the plugboard may not be set beyond the physical limit.");
+                }
                 this->maximumConnections = newMax;
             };
 
@@ -272,9 +284,9 @@ namespace EnigmaMachine {
             };
 
             char run(char character) const {
-                // Error here FAULTY CODE
-                if (connections.checkPairExistence(character, character)) {
-                    return connections.getCorrespondant(character);
+
+                if (this->connections.checkElementExistence(character)) {
+                    return this->connections.getCorrespondant(character);
                 } else {
                     return character;
                 }
