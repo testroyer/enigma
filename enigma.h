@@ -22,6 +22,7 @@ namespace EnigmaMachine {
     */
     const std::string enigmaAllowedLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+    // character - 'A' Works best so depracated 
     const std::map<char, int> enigmaLetterToIndex = {{'A', 0}, {'B', 1}, {'C', 2}, {'D', 3}, {'E', 4}, {'F', 5}, {'G', 6}, {'H', 7}, {'I', 8}, {'J', 9}, {'K', 10}, {'L', 11}, {'M', 12}, {'N', 13}, {'O', 14}, {'P', 15}, {'Q', 16}, {'R', 17}, {'S', 18}, {'T', 19}, {'U', 20}, {'V', 21}, {'W', 22}, {'X', 23}, {'Y', 24}, {'Z', 25}};
 
     //Check if the character is an enigma-enabled character
@@ -43,6 +44,9 @@ namespace EnigmaMachine {
         protected:
             // Internal map "forwards" wiring of the rotor.
             std::map<char ,char> intWiring;
+            
+            // Internal map "backwards" wiring of the rotor.
+            map<char, char> reverseWiring;
 
             /*
             Creates internal wiring by relating the chiffre to the enigmaAllowedLetters in order.
@@ -174,7 +178,7 @@ namespace EnigmaMachine {
             int getMaximumConnections() const noexcept;
 
             //Sets the current number for maximum amount of connections.
-            void setMaximumConenctions(int newMax);
+            void setMaximumConnections(int newMax);
             
             //Returns the Bipair<char> connections property.
             const Bipair<char>& getConnections() const noexcept;
@@ -209,14 +213,14 @@ namespace EnigmaMachine {
             Gets the data to create the objects itself.
             This constructor doesn't specify a notch position for the rotors. You must set it yourself.
             */
-            Enigma(std::initializer_list<std::map<char, char>> rotors, Bipair<char> reflector, Bipair<char> initialPlugboard);
+            Enigma(std::initializer_list<std::map<char, char>> rotors, std::initializer_list<int> rotorPositions, std::initializer_list<int> notchPositions, Bipair<char> reflector, Bipair<char> initialPlugboard);
 
             /*
             Gets the data to create the objects itself.
             This constructor doesn't specify a notch position for the rotors. You must set it yourself.
             Chiffre is a 26 char string. One by one it is maped to the enigma allowed lettres. ("A" -> [0] , "B" -> [1] and so o and so on).
             */
-            Enigma(std::initializer_list<std::string> rotorsChiffres, std::string reflectorChiffre, Bipair<char> initialPlugboard);
+            Enigma(std::initializer_list<std::string> rotorsChiffres, std::initializer_list<int> rotorPositions, std::initializer_list<int> notchPositions, std::string reflectorChiffre, Bipair<char> initialPlugboard);
 
             // Encryption of a single char character. The result is returned as a char.
             char encrypt(char character);

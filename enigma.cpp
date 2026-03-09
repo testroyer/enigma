@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <utility>
 #include <map>
+#include <set>
 #include <cctype>
 #include <sstream>
 
@@ -22,10 +23,11 @@ namespace EnigmaMachine {
     // enigmaAllowedLetters(i) = enigmaLetterToIndex^-1(i)
     const string enigmaAllowedLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+    // character - 'A' Works best so depracated 
     const map<char, int> enigmaLetterToIndex = {{'A', 0}, {'B', 1}, {'C', 2}, {'D', 3}, {'E', 4}, {'F', 5}, {'G', 6}, {'H', 7}, {'I', 8}, {'J', 9}, {'K', 10}, {'L', 11}, {'M', 12}, {'N', 13}, {'O', 14}, {'P', 15}, {'Q', 16}, {'R', 17}, {'S', 18}, {'T', 19}, {'U', 20}, {'V', 21}, {'W', 22}, {'X', 23}, {'Y', 24}, {'Z', 25}};
 
     bool checkIfEngimaEnabledChar(char character) noexcept {
-        return ((character >= 'A' && character <= 'Z') && isupper(character));
+        return ((character >= 'A' && character <= 'Z')); // Removed isupper cause it is between the bounds.
     }
 
     void checkAndThrowIfNotEnigmaEnabledChar(char character, const void* objectAddress) {
@@ -53,6 +55,8 @@ namespace EnigmaMachine {
 
             // Must use map here as two sides of the rotors are connected.
             map<char ,char> intWiring;
+
+            map<char, char> reverseWiring;
             
             //Chiffre means the order the the letters are cyrpted (For "ZASTQ..." , A->Z ,B->A and so on ) 
             map<char, char> createInternalWiringMap(string chiffre){
@@ -63,10 +67,12 @@ namespace EnigmaMachine {
                     throw std::runtime_error(oss.str());
                 }
 
+                set<char> seenCharacters; // To check for duplicates
                 for (int i = 0; i < 26 ; i++){
                     char currentChiffre = toupper(chiffre[i]);
                     checkAndThrowIfNotEnigmaEnabledChar(currentChiffre, this); 
-                    if (this->intWiring.find(currentChiffre) != this->intWiring.end()) {
+
+                    if (!seenCharacters.insert(currentChiffre).second) { // If the character was already seen, it's a duplicate
                         std::ostringstream oss;
                         oss << "Error: duplicate character in chiffre while initializing. Object at " << this;
                         throw std::runtime_error(oss.str());
@@ -98,13 +104,17 @@ namespace EnigmaMachine {
                 : intWiring(createInternalWiringMap(chiffre)), 
                 position(((startPosition >= 0) && (startPosition <= 25)) ? startPosition : startPosition % 26), 
                 notchPlacement(((notchPlacement >= 0) && (notchPlacement <= 25)) ? notchPlacement : notchPlacement % 26) 
-            {};
+            {
+                this->reverseWiring = this->getReverseWiring();
+            };
 
             Rotor(const map<char , char>& wiring, int startPosition = 0, int notchPlacement = 0) 
                 : intWiring(checkInternalWiringMap(wiring)), 
                 position(((startPosition >= 0) && (startPosition <= 25)) ? startPosition : startPosition % 26), 
                 notchPlacement(((notchPlacement >= 0) && (notchPlacement <= 25)) ? notchPlacement : notchPlacement % 26) 
-            {};
+            {
+                this->reverseWiring = this->getReverseWiring();
+            };
 
             void setPosition(int pos){
                 if ((pos < 0) || (pos > 25)) {
@@ -158,8 +168,7 @@ namespace EnigmaMachine {
             char reverseRun(char character) const {
                 character = toupper(character);
                 checkAndThrowIfNotEnigmaEnabledChar(character, this);
-                map<char, char> reverse = this->getReverseWiring();
-                return reverse.at(character);
+                return this->reverseWiring.at(character);
             };
 
             //Scrapped function ideas, might be useful later on but for now they just add unneccesary complexity
@@ -248,7 +257,7 @@ namespace EnigmaMachine {
                 }
                 this->maximumConnections = maximumConnections;
 
-                if (plugboardWiring.size() > 13) {
+                if (plugboardWiring.size() > 13 || plugboardWiring.size() > maximumConnections) {
                     throw runtime_error("Error: tried to initialize a plugboard with more than phyically possible connections");
                 }
                 this->connections = plugboardWiring;
@@ -264,7 +273,7 @@ namespace EnigmaMachine {
                     throw runtime_error("Error: Maximum number of connections reached.");
                 }
 
-                this->connections.addPair(pair.first, pair.second);
+                this->connections.addPair(first, second);
             };
 
             void removeConnection(pair<char , char> pair) {
@@ -273,7 +282,7 @@ namespace EnigmaMachine {
                 char second = toupper(pair.second);
                 checkAndThrowIfNotEnigmaEnabledChar(first, this);
                 checkAndThrowIfNotEnigmaEnabledChar(second, this);
-                this->connections.removePair(pair.first, pair.second);
+                this->connections.removePair(first, second);
             }; 
 
             int getConnectionNumber() const noexcept {
@@ -284,7 +293,7 @@ namespace EnigmaMachine {
                 return this->maximumConnections;
             };
 
-            void setMaximumConenctions(int newMax) {
+            void setMaximumConnections(int newMax) {
                 if (newMax < 0) {
                     throw runtime_error("Error: number of maximum connections on the plugboard may not be set to a negative value");
                 }
@@ -321,30 +330,47 @@ namespace EnigmaMachine {
 
             //Gets already created objects
             Enigma(vector<Rotor> rotors, Reflector reflector, Plugboard initialPlugboard) 
-                : rotors(rotors), 
-                reflector(reflector), 
+                :reflector(reflector), 
                 plugboard(initialPlugboard) 
-            {};
+            {
+                if (rotors.size() == 0) {
+                    throw runtime_error("Error: An enigma machine must have at least one rotor.");
+                    std::ostringstream oss;
+                    oss << "Error: An enigma machine must have at least one rotor. Object at:" << this;
+                    throw std::runtime_error(oss.str());
+                }
+                this->rotors = rotors;
+            };
             
             /*
             Gets the data to create the objects itself.
             Problem with these is that they don't determine any notch placement
             */
-            Enigma(initializer_list<map<char, char>> rotors, Bipair<char> reflector, Bipair<char> initialPlugboard) 
+            Enigma(initializer_list<map<char, char>> rotors, initializer_list<int> rotorPositions, initializer_list<int> notchPositions, Bipair<char> reflector, Bipair<char> initialPlugboard) 
                 : reflector(reflector), 
-                plugboard(plugboard) 
+                plugboard(initialPlugboard) 
             {
-                for (int i = 0 ; i < rotors.size() ; i++) {
-                    this->rotors.emplace_back(*(rotors.begin()+i)); // Pointer maigic cause you know C++
+                if ((rotors.size() != rotorPositions.size() || rotors.size() != notchPositions.size()) || (rotors.size() == 0 || rotorPositions.size() == 0 || notchPositions.size() == 0)) {
+                    std::ostringstream oss;
+                    oss << "Error: Size of rotors, rotorPositions and notchPositions must be the same and mustn't be empty. Object at" << this;
+                    throw std::runtime_error(oss.str());
+                }
+                for (int i = 0; i < rotors.size() ; i++) {
+                    (*this).rotors.emplace_back(*(rotors.begin()+i) , *(rotorPositions.begin()+i) , *(notchPositions.begin()+i)); // Pointer magic cause you know C++ TODO: Might be a bit unsafe. do an iter for each maybe?
                 }
             };
 
-            Enigma(initializer_list<string> rotorsChiffres, string reflectorChiffre, Bipair<char> initialPlugboard)
+            Enigma(initializer_list<string> rotorsChiffres, initializer_list<int> rotorPositions, initializer_list<int> notchPositions, string reflectorChiffre, Bipair<char> initialPlugboard)
                 : reflector(Reflector(reflectorChiffre)),
                 plugboard(initialPlugboard)
             {
+                if ((rotorsChiffres.size() != rotorPositions.size() || rotorsChiffres.size() != notchPositions.size()) || (rotorsChiffres.size() == 0 || rotorPositions.size() == 0 || notchPositions.size() == 0)) {
+                    std::ostringstream oss;
+                    oss << "Error: Size of rotorsChiffres, rotorPositions and notchPositions must be the same and mustn't be empty. Object at" << this;
+                    throw std::runtime_error(oss.str());
+                }
                 for (int i = 0; i < rotorsChiffres.size() ; i++) {
-                    (*this).rotors.emplace_back(*(rotorsChiffres.begin()+i));
+                    (*this).rotors.emplace_back(*(rotorsChiffres.begin()+i) , *(rotorPositions.begin()+i) , *(notchPositions.begin()+i)); // Pointer magic cause you know C++
                 }
             };
 
@@ -359,6 +385,14 @@ namespace EnigmaMachine {
                 if (character == ' ') {
                     return character;
                 }
+                // Rotate logic
+                for (auto rotor = rotors.begin() ; rotor != rotors.end() ; ++rotor) {
+                    bool rotateNext = rotor->rotate();
+                    if (!rotateNext) { // If the current rotor doesn't cause the next one to rotate or if it is the last rotor,
+                        break;
+                    }
+                }
+
                 /*
                 Signal flow:
                 Input -> Plugboard -> Rotors[] -> Reflector -> Rotors[] (reverse) -> Plugboard -> Output 
@@ -396,13 +430,6 @@ namespace EnigmaMachine {
                 currentCharacterState = this->plugboard.run(currentCharacterState);
 
 
-                // Rotate logic
-                for (auto rotor = rotors.begin() ; rotor != rotors.end() ; ++rotor) {
-                    bool rotateNext = rotor->rotate();
-                    if (!rotateNext) { // If the current rotor doesn't cause the next one to rotate or if it is the last rotor,
-                        break;
-                    }
-                }
 
                return currentCharacterState;
 
@@ -411,13 +438,14 @@ namespace EnigmaMachine {
             //Caution while calling this as the paramater and formula placement are mixed
             char determineRotorInput(char character, int currentPos, int previousPos) const {
                 return enigmaAllowedLetters[(
-                    ((enigmaLetterToIndex.at(character) - previousPos + currentPos) % 26 + 26) % 26
+                    (((character - 'A') - previousPos + currentPos) % 26 + 26) % 26
                     )];
 
             }
 
             string encrypt(string message) {
                 string result;
+                result.reserve(message.size()); // Reservation of memory. Suggested by AIACC
                 for (char& character : message) {
                     result += this->encrypt(character);
                 }
