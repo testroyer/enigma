@@ -20,10 +20,10 @@ namespace EnigmaMachine {
     * char[27] enigmaAllowedLetters: List of enigma enabled Latin characters
     * 
     */
-    const std::string enigmaAllowedLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const std::string enigmaAllowedLetters;
 
     // character - 'A' Works best so depracated 
-    const std::map<char, int> enigmaLetterToIndex = {{'A', 0}, {'B', 1}, {'C', 2}, {'D', 3}, {'E', 4}, {'F', 5}, {'G', 6}, {'H', 7}, {'I', 8}, {'J', 9}, {'K', 10}, {'L', 11}, {'M', 12}, {'N', 13}, {'O', 14}, {'P', 15}, {'Q', 16}, {'R', 17}, {'S', 18}, {'T', 19}, {'U', 20}, {'V', 21}, {'W', 22}, {'X', 23}, {'Y', 24}, {'Z', 25}};
+    const std::map<char, int> enigmaLetterToIndex;
 
     //Check if the character is an enigma-enabled character
     bool checkIfEngimaEnabledChar(char character) noexcept;
@@ -73,7 +73,8 @@ namespace EnigmaMachine {
             /*
             Rotor constructor by map object.
             */
-            Rotor(std::map<char , char>& wiring, int startPosition = 0, int notchPlacement = 0);
+            Rotor(const std::map<char , char>& wiring, int startPosition = 0, int notchPlacement = 0);
+
         
             // Sets int position porperty.
             void setPosition(int pos);
@@ -85,7 +86,7 @@ namespace EnigmaMachine {
             int getNotchPosition() const noexcept;
 
             // Sets int notchPosition porperty.
-            void setNotchPosition();
+            void setNotchPosition(int notchPos);
 
             /*
             Increments rotor position by one.
@@ -94,7 +95,7 @@ namespace EnigmaMachine {
             bool rotate() noexcept;
 
             //Retuns the reverse wiring of the motor (key and value of the intWiring reversed).
-            const std::map<char , char> getReverseWiring() const;
+            std::map<char , char> getReverseWiring() const;
 
             //Runs a letter through the internal wiring and returns the result as a char.
             char run(char character) const;
@@ -227,7 +228,7 @@ namespace EnigmaMachine {
 
 
             // Formula to determine which rotor output correlates to which rotor input.
-            char determineRotorInput(char character, Rotor& current, Rotor& previous) const;
+            char determineRotorInput(char character, int currentPos, int previousPos) const;
 
             /*
             Encryption of a string message. The message is encrypted char by char and the result is returned as a string.

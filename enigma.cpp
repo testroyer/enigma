@@ -8,6 +8,7 @@
 #include <set>
 #include <cctype>
 #include <sstream>
+#include "enigma.h"
 
 using namespace std;
 
@@ -82,7 +83,7 @@ namespace EnigmaMachine {
                 return this->intWiring; //Return value just-in-case
             }; 
 
-            map<char , char> checkInternalWiringMap(std::map<char , char> wiring) const {
+            map<char , char> checkInternalWiringMap(const std::map<char , char> wiring) const {
                 
                 if (wiring.size() != 26) {
                     std::ostringstream oss;
