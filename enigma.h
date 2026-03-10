@@ -20,15 +20,15 @@ namespace EnigmaMachine {
     * char[27] enigmaAllowedLetters: List of enigma enabled Latin characters
     * 
     */
-    const std::string enigmaAllowedLetters;
+    extern const std::string enigmaAllowedLetters;
 
     // character - 'A' Works best so depracated 
-    const std::map<char, int> enigmaLetterToIndex;
+    extern const std::map<char, int> enigmaLetterToIndex;
 
     //Check if the character is an enigma-enabled character
-    bool checkIfEngimaEnabledChar(char character) noexcept;
+    extern bool checkIfEngimaEnabledChar(char character) noexcept;
 
-    void checkAndThrowIfNotEnigmaEnabledChar(char character, const void* objectAddress);
+    extern void checkAndThrowIfNotEnigmaEnabledChar(char character, const void* objectAddress);
 
     /** 
     *Class simulating the rotorrotorss of an Enigma Machine.
@@ -114,6 +114,8 @@ namespace EnigmaMachine {
             
             // Creates the bipair object for the wiring property
             Bipair<char> createWiring(std::string chiffre);
+
+            Bipair<char> checkInternalWiringMap(Bipair<char> wiring) const;
 
         public:
            
