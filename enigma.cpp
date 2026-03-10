@@ -9,6 +9,7 @@
 #include <cctype>
 #include <sstream>
 #include "enigma.h"
+#include <iostream>
 
 using namespace std;
 
@@ -44,7 +45,7 @@ namespace EnigmaMachine {
             
         //Chiffre means the order the the letters are cyrpted (For "ZASTQ..." , A->Z ,B->A and so on ) 
         map<char, char> Rotor::createInternalWiringMap(std::string chiffre){
-
+            map<char, char> intWiring;
             if (chiffre.size() != 26) {
                 std::ostringstream oss;
                 oss << "Error: Size of chiffre does not match 26 while initializing. Object at " << this;
@@ -61,9 +62,9 @@ namespace EnigmaMachine {
                     oss << "Error: duplicate character in chiffre while initializing. Object at " << this;
                     throw std::runtime_error(oss.str());
                 }
-                this->intWiring[enigmaAllowedLetters[i]] = currentChiffre;
+                intWiring[enigmaAllowedLetters[i]] = currentChiffre;
             }
-            return this->intWiring; //Return value just-in-case
+            return intWiring; //Return value just-in-case
         }; 
 
         map<char , char> Rotor::checkInternalWiringMap(const std::map<char , char> wiring) const {
@@ -124,11 +125,12 @@ namespace EnigmaMachine {
         Although it is percieved that incrementing the position variable will rotate the rotor up, the reality is the quite contrary.
         */
         bool Rotor::rotate() noexcept{
+            int startPosition = this->position;
             this->position++;
             if (this->position == 26) {
                 this->position = 0;
             }
-            return this->position == this->notchPlacement;
+            return startPosition == this->notchPlacement;
         };
 
         map<char , char> Rotor::getReverseWiring() const {
@@ -164,17 +166,18 @@ namespace EnigmaMachine {
 
         Bipair<char> Reflector::createWiring(std::string chiffre) {
             Bipair<char> bipair;
-
             if (chiffre.size() != 26) {
                 throw runtime_error("Error: Size of chiffre does not match 26");
             }
             for (int i = 0; i < 26 ; i++) {
                 char currentChiffre = toupper(chiffre[i]);
                 checkAndThrowIfNotEnigmaEnabledChar(currentChiffre, this);
-                bipair.addPair(enigmaAllowedLetters[i] , currentChiffre);
+                if (!bipair.checkElementExistence(enigmaAllowedLetters[i])) {
+                    bipair.addPair(enigmaAllowedLetters[i], currentChiffre);
+                }
             }
             return bipair;
-        };
+        }
 
         Bipair<char> Reflector::checkInternalWiringMap(Bipair<char> wiring) const {
             
@@ -349,13 +352,6 @@ namespace EnigmaMachine {
             if (character == ' ') {
                 return character;
             }
-            // Rotate logic
-            for (auto rotor = rotors.begin() ; rotor != rotors.end() ; ++rotor) {
-                bool rotateNext = rotor->rotate();
-                if (!rotateNext) { // If the current rotor doesn't cause the next one to rotate or if it is the last rotor,
-                    break;
-                }
-            }
 
             /*
             Signal flow:
@@ -383,17 +379,24 @@ namespace EnigmaMachine {
 
             // Rotors (reverse) run
             for (auto rotor = this->rotors.rbegin(); rotor != this->rotors.rend(); ++rotor) {
-                currentCharacterState = rotor->reverseRun(this->determineRotorInput(
-                    currentCharacterState , 
-                    rotor->getPosition() , 
-                    (rotor != (this->rotors.rbegin()) ? (*(rotor-1)).getPosition() : 0)
-                ));
+                int prevPos = (rotor != this->rotors.rbegin()) ? (*(rotor-1)).getPosition() : 0;
+                int currPos = rotor->getPosition();
+                
+                currentCharacterState = rotor->reverseRun(
+                    this->determineRotorInput(currentCharacterState, currPos, prevPos)
+                );
             }
 
             // Last plugbaord run
             currentCharacterState = this->plugboard.run(currentCharacterState);
 
-
+            // Rotate logic
+            for (auto rotor = rotors.begin() ; rotor != rotors.end() ; ++rotor) {
+                bool rotateNext = rotor->rotate();
+                if (!rotateNext) { // If the current rotor doesn't cause the next one to rotate or if it is the last rotor,
+                    break;
+                }
+            }
 
             return currentCharacterState;
 
@@ -449,6 +452,14 @@ namespace EnigmaMachine {
             }
 
         }
-    #pragma endregion
 
+        vector<int> Enigma::getRotorPositions() const {
+            vector<int> positions;
+            for (const auto& rotor : this->rotors) {
+                positions.push_back(rotor.getPosition());
+            }
+            return positions;
+        }
+
+    #pragma endregion
 }

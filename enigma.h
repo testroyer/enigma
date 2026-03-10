@@ -26,9 +26,9 @@ namespace EnigmaMachine {
     extern const std::map<char, int> enigmaLetterToIndex;
 
     //Check if the character is an enigma-enabled character
-    extern bool checkIfEngimaEnabledChar(char character) noexcept;
+    bool checkIfEngimaEnabledChar(char character) noexcept;
 
-    extern void checkAndThrowIfNotEnigmaEnabledChar(char character, const void* objectAddress);
+    void checkAndThrowIfNotEnigmaEnabledChar(char character, const void* objectAddress);
 
     /** 
     *Class simulating the rotorrotorss of an Enigma Machine.
@@ -62,7 +62,7 @@ namespace EnigmaMachine {
         public:
 
             //Default constructor. Creates a rotor with no internal wiring and position and notchPlacement set to 0.
-            Rotor();
+            Rotor() = default;
 
             /*
             Rotor constructor.
@@ -115,12 +115,13 @@ namespace EnigmaMachine {
             // Creates the bipair object for the wiring property
             Bipair<char> createWiring(std::string chiffre);
 
+            // Checks if the wiring bipair is valid. It must contain 26 entries and all keys and values must be in the enigmaAllowedLetters list.
             Bipair<char> checkInternalWiringMap(Bipair<char> wiring) const;
 
         public:
            
             // Default constructor. Creates a reflector with no internal wiring.
-            Reflector();
+            Reflector() = default;
 
             /*
             Reflector constructor by chiffre.
@@ -155,7 +156,7 @@ namespace EnigmaMachine {
         public:
             
             // Default constructor. Creates a plugboard with no connections and maximumConnections set to 10.
-            Plugboard();
+            Plugboard() = default;
 
             /*
             Plugboard constructor by a Bipair object.
@@ -254,6 +255,11 @@ namespace EnigmaMachine {
             Can be initialized with curly braces.
             */
             void setRotorPositions(std::initializer_list<int> positions);
+
+            /*
+            Returns a vector of integers representing the current positions of the rotors, starting from the rightmost rotor.
+            */
+            std::vector<int> getRotorPositions() const;
     };
 
 }
