@@ -46,7 +46,7 @@ namespace EnigmaMachine {
             std::map<char ,char> intWiring;
             
             // Internal map "backwards" wiring of the rotor.
-            map<char, char> reverseWiring;
+            std::map<char, char> reverseWiring;
 
             /*
             Creates internal wiring by relating the chiffre to the enigmaAllowedLetters in order.
