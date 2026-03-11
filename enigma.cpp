@@ -412,10 +412,6 @@ namespace EnigmaMachine {
 
         //Caution while calling this as the paramater and formula placement are mixed
         char Enigma::determineRotorInput(char character, int nextPosition, int previousPos) const {
-            cout << character << " : " << enigmaAllowedLetters[(
-                normalisePosition((normalisePosition((character - 'A') - previousPos)) + nextPosition)
-                )] << endl;
-
             return enigmaAllowedLetters[(
                 normalisePosition((normalisePosition((character - 'A') - previousPos)) + nextPosition)
                 )];
