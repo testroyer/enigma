@@ -16,7 +16,8 @@ int main() {
         Plugboard plugboard = Plugboard(plugboardWiring);
         Enigma enigma = Enigma(rotors, reflector, plugboard);
 
-
+        cout << enigma.encrypt("VVMXT XKUJG");
+;
     } catch (const std::exception& e) {
         cout << "exception: " << e.what() << "\n";
     }

@@ -30,6 +30,8 @@ namespace EnigmaMachine {
 
     void checkAndThrowIfNotEnigmaEnabledChar(char character, const void* objectAddress);
 
+    int normalisePosition(int position);
+
     /** 
     *Class simulating the rotorrotorss of an Enigma Machine.
     */

@@ -39,6 +39,11 @@ namespace EnigmaMachine {
                 throw std::runtime_error(oss.str());
             }
     }
+
+    int normalisePosition(int position) {
+        return ((position % 26) + 26) % 26;
+    };
+    
     #pragma endregion
 
     #pragma region Rotor
@@ -380,12 +385,15 @@ namespace EnigmaMachine {
             // Rotors (reverse) run
             for (auto rotor = this->rotors.rbegin(); rotor != this->rotors.rend(); ++rotor) {
                 int prevPos = (rotor != this->rotors.rbegin()) ? (*(rotor-1)).getPosition() : 0;
-                int currPos = rotor->getPosition();
+                int nexPos = rotor->getPosition();
                 
                 currentCharacterState = rotor->reverseRun(
-                    this->determineRotorInput(currentCharacterState, currPos, prevPos)
+                    this->determineRotorInput(currentCharacterState, nexPos, prevPos)
                 );
             }
+            
+            // Reset the rotor offset before going into the plugboard
+            currentCharacterState = this->determineRotorInput(currentCharacterState , 0 , rotors[0].getPosition());
 
             // Last plugbaord run
             currentCharacterState = this->plugboard.run(currentCharacterState);
@@ -403,9 +411,13 @@ namespace EnigmaMachine {
         };
 
         //Caution while calling this as the paramater and formula placement are mixed
-        char Enigma::determineRotorInput(char character, int currentPos, int previousPos) const {
+        char Enigma::determineRotorInput(char character, int nextPosition, int previousPos) const {
+            cout << character << " : " << enigmaAllowedLetters[(
+                normalisePosition((normalisePosition((character - 'A') - previousPos)) + nextPosition)
+                )] << endl;
+
             return enigmaAllowedLetters[(
-                (((character - 'A') - previousPos + currentPos) % 26 + 26) % 26
+                normalisePosition((normalisePosition((character - 'A') - previousPos)) + nextPosition)
                 )];
 
         }
