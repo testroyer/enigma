@@ -37,6 +37,30 @@ using namespace EnigmaMachine;
  * Set Plugboard
  * */
 
+void draw_box() {
+    int intraLetterGap = 3;
+    int outer_box_width = ((9 + (8*intraLetterGap) + (2*intraLetterGap))+2)-1;
+    int outer_box_height = 25-1;
+
+    for (int column = 0 ; column <= outer_box_width; column++){
+        for (int row = 0; row <= outer_box_height; row++) {
+            if (row == 0 && column == 0) {
+                tb_set_cell(column, row , BOX_TL , TB_WHITE , TB_256_BLACK);
+            } else if (row == 0 && column == outer_box_width) {
+                tb_set_cell(column, row , BOX_TR , TB_WHITE , TB_256_BLACK);
+            } else if (row == outer_box_height && column == 0) {
+                tb_set_cell(column, row , BOX_BL , TB_WHITE , TB_256_BLACK);
+            } else if (row == outer_box_height && column == outer_box_width) {
+                tb_set_cell(column, row , BOX_BR , TB_WHITE , TB_256_BLACK);
+            } else if (row == 0 || row == 14 || row == outer_box_height) {
+                tb_set_cell(column, row , BOX_HL , TB_WHITE , TB_256_BLACK);
+            } else if (column == 0 || column == outer_box_width) {
+                tb_set_cell(column, row , BOX_VL , TB_WHITE , TB_256_BLACK);
+            }
+        }
+    }
+};
+
 int main() {
     try {
 
