@@ -13,7 +13,6 @@ class Bipair {
         std::vector<std::pair<T, T>> pairs;  
 
         bool initialHasDoublePairing(const std::vector<std::pair<T, T>>& initialPairs) {
-            //TODO: Check if the pair is of same data type.
             std::unordered_set<T> elements;
             for (const auto& p : initialPairs) {
                 if (elements.insert(p.first).second == false || elements.insert(p.second).second == false) {
@@ -25,7 +24,6 @@ class Bipair {
         }; 
 
         bool initialHasDoublePairing(const std::initializer_list<std::pair<T, T>>& initialPairs) {
-            //TODO: Check if the pair is of same data type.
             std::unordered_set<T> elements;
             for (const auto& p : initialPairs) {
                 if (elements.count(p.first) || elements.count(p.second)) {

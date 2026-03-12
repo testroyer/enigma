@@ -18,7 +18,6 @@ namespace EnigmaMachine {
     // The value 26 is usually hard coded for enigmaAllowedLetters.size();
     //TODO: String ctors, chiffres and runs along with chars
     //TODO: Iter increments
-    //TODO: AIACC Fixes
 
     #pragma region Enigma-allowed characters and related functions
     

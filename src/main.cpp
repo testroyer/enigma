@@ -42,13 +42,24 @@
 // Define global dimensions
 constexpr int intra_letter_gap = 3;
 constexpr int left_right_total_margin = 16;
-constexpr int rotor_box_height = 15; // Incl. borders
-constexpr int lampboard_height = 11; // Incl. borders
-constexpr int outer_box_width = 9 + (8*intra_letter_gap) + 2 + left_right_total_margin - 1; //  outer_box_width = charactersPerRow + gapBetweenCharacters + edgeCharacters + left_right_total_margin - startFromZero;
-constexpr int outer_box_height = rotor_box_height + lampboard_height - 1 - 1; // outer_box_height = rotor_box_height + lampboard_height - commun_border - startFromZero;
+constexpr int border = 1;
 
-//                = (((outer_box_width - borders) - (letters*FONT_W)+letter_gaps))/ 2.0) + left_border ;
-auto center_element = [](int element_length){ return (int)round(((outer_box_width-2)-element_length)/2.0)+1; };
+constexpr int intra_rotor_gap = 1;
+constexpr int intra_rotor_number_y = 1;
+constexpr int shown_rotor_number_count = 3; //Always an odd number to have a center rotor number 
+constexpr int shown_digit_count = 2; // For displaying rotor numbers as 01, 02, etc.
+constexpr int rotor_shown_number_lr_margin = 2;
+constexpr int rotor_element_updown_margin = 2;
+
+constexpr int rotor_element_width = shown_digit_count + 2*rotor_shown_number_lr_margin + 2*border; 
+constexpr int rotor_element_heigth = (shown_rotor_number_count + 2) + ((shown_rotor_number_count + 2) + 1)*intra_rotor_number_y + 2*border; // +2 are for mover characters
+
+constexpr int rotor_box_height = rotor_element_heigth + 2*rotor_element_updown_margin + 2*border; 
+constexpr int lampboard_height = 11; // Incl. TWO borders, À dynamiser
+
+constexpr int outer_box_width = 9 + (8*intra_letter_gap) + 2*border+ left_right_total_margin; // À dynamiser
+constexpr int outer_box_height = rotor_box_height + lampboard_height - border; 
+
 
 // Pixel font data for each letter (5 wide x 7 tall)
 const int FONT_W = 5;
@@ -110,34 +121,45 @@ const bool letters[][FONT_H][FONT_W] = {
 using namespace std;
 using namespace EnigmaMachine;
 
+//Helper lambdas
+auto center = [](int size ,int outer_element_width , bool biggerGapFirst = false) -> int { 
+    return (int)(((outer_element_width-2)-size)/2.0)+((int)(biggerGapFirst))+border; 
+};
+
+auto get_rotor_number_as_str = [](int active_rotor_number) -> string {
+    return to_string(active_rotor_number).length() == 1 ? "0" + to_string(active_rotor_number) : to_string(active_rotor_number); // Pad with zero if single digit 
+};
 
 
+#pragma region Drawer Functions
 void draw_outer_box() {
+    int c_box_width_limit = outer_box_width - 1; // Adjust for 0-based indexing
+    int c_box_height_limit = outer_box_height - 1; // Adjust for 0-based
 
-    for (int column = 0 ; column <= outer_box_width; column++){
-        for (int row = 0; row <= outer_box_height; row++) {
+    for (int column = 0 ; column <= c_box_width_limit; column++){
+        for (int row = 0; row <= c_box_height_limit; row++) {
             if (row == 0 && column == 0) { // Top left corner
                 tb_set_cell(column, row , BOX_TL , COLOR_WHITE , TB_256_BLACK);
             } 
-            else if (row == 0 && column == outer_box_width) { // Top right corner
+            else if (row == 0 && column == c_box_width_limit) { // Top right corner
                 tb_set_cell(column, row , BOX_TR , COLOR_WHITE , TB_256_BLACK);
             } 
-            else if (row == outer_box_height && column == 0) { // Bottom left corner
+            else if (row == c_box_height_limit && column == 0) { // Bottom left corner
                 tb_set_cell(column, row , BOX_BL , COLOR_WHITE , TB_256_BLACK);
             } 
-            else if (row == outer_box_height && column == outer_box_width) { // Bottom right corner
+            else if (row == c_box_height_limit && column == c_box_width_limit) { // Bottom right corner
                 tb_set_cell(column, row , BOX_BR , COLOR_WHITE , TB_256_BLACK);
             }
-            else if (row == 14 && column == 0) { // T pointing down on left edge
+            else if (row == rotor_box_height-1 && column == 0) { // T pointing down on left edge
                 tb_set_cell(column, row , BOX_T_RIGHT , COLOR_WHITE , TB_256_BLACK);
             }
-            else if (row == 14 && column == outer_box_width) { // T pointing down on right edge
+            else if (row == rotor_box_height-1 && column == c_box_width_limit) { // T pointing down on right edge
                 tb_set_cell(column, row , BOX_T_LEFT , COLOR_WHITE , TB_256_BLACK);
             } 
-            else if (row == 0 || row == 14 || row == outer_box_height) { // Horizontal lines
+            else if (row == 0 || row == rotor_box_height-1 || row == c_box_height_limit) { // Horizontal lines
                 tb_set_cell(column, row , BOX_HL , COLOR_WHITE , TB_256_BLACK);
             } 
-            else if (column == 0 || column == outer_box_width) { // Vertical lines
+            else if (column == 0 || column == c_box_width_limit) { // Vertical lines
                 tb_set_cell(column, row , BOX_VL , COLOR_WHITE , TB_256_BLACK);
             }
         }
@@ -145,26 +167,27 @@ void draw_outer_box() {
 };
 
 void draw_welcome_box() {
+    int c_box_width_limit = outer_box_width - 1; // Adjust for 0-based indexing
+    int c_box_height_limit = outer_box_height - 1; // Adjust for 0-based
 
-
-    for (int column = 0 ; column <= outer_box_width; column++){
-        for (int row = 0; row <= outer_box_height; row++) {
+    for (int column = 0 ; column <= c_box_width_limit; column++){
+        for (int row = 0; row <= c_box_height_limit; row++) {
             if (row == 0 && column == 0) { // Top left corner
                 tb_set_cell(column, row , BOX_TL , COLOR_WHITE , TB_256_BLACK);
             } 
-            else if (row == 0 && column == outer_box_width) { // Top right corner
+            else if (row == 0 && column == c_box_width_limit) { // Top right corner
                 tb_set_cell(column, row , BOX_TR , COLOR_WHITE , TB_256_BLACK);
             } 
-            else if (row == outer_box_height && column == 0) { // Bottom left corner
+            else if (row == c_box_height_limit && column == 0) { // Bottom left corner
                 tb_set_cell(column, row , BOX_BL , COLOR_WHITE , TB_256_BLACK);
             } 
-            else if (row == outer_box_height && column == outer_box_width) { // Bottom right corner
+            else if (row == c_box_height_limit && column == c_box_width_limit) { // Bottom right corner
                 tb_set_cell(column, row , BOX_BR , COLOR_WHITE , TB_256_BLACK);
             }
-            else if (row == 0 || row == outer_box_height) { // Horizontal lines
+            else if (row == 0 || row == c_box_height_limit) { // Horizontal lines
                 tb_set_cell(column, row , BOX_HL , COLOR_WHITE , TB_256_BLACK);
             } 
-            else if (column == 0 || column == outer_box_width) { // Vertical lines
+            else if (column == 0 || column == c_box_width_limit) { // Vertical lines
                 tb_set_cell(column, row , BOX_VL , COLOR_WHITE , TB_256_BLACK);
             }
         }
@@ -192,7 +215,67 @@ void draw_enigma_title(int start_x, int start_y, int fg_color, int bg_color) { /
     }
 }
 
+void draw_rotor_assembly(Enigma enigma) {
+    // Rotor assembly dimensions and positioning
+    int brute_rotor_assembly_width = (enigma.rotors.size() * rotor_element_width) + ((enigma.rotors.size() - 1) * intra_rotor_gap);
+    int rotor_assembly_start_x = center(brute_rotor_assembly_width , outer_box_width);
+    int rotor_assembly_start_y = center(rotor_element_heigth , rotor_box_height);
 
+    //Get border placements
+    for (int i = 0; i < enigma.rotors.size(); i++) {
+        //Top-left of the current rotor box
+        int rotor_x = rotor_assembly_start_x + i * (rotor_element_width + intra_rotor_gap);
+        int rotor_y = rotor_assembly_start_y;
+
+        int c_box_width_limit = rotor_element_width - 1; // Adjust for 0-based indexing
+        int c_box_height_limit = rotor_element_heigth - 1; // Adjust for 0-based indexing
+
+        int c_rotor_box_center_x = center(2 , rotor_element_width ); // Center the rotor number in the box
+        int c_rotor_box_center_y = center(1 , rotor_element_heigth ); // Center the rotor number in the box;
+
+        int current_rotor_number = enigma.rotors[i].getPosition() + 1; // Get the current rotor number (1-based index)
+        string rotor_number_str = get_rotor_number_as_str(current_rotor_number);
+
+        // Draw rotor box
+        for (int column = 0; column <= c_box_width_limit; column++) {
+            for (int row = 0; row <= c_box_height_limit; row++) {
+                if (row == 0 && column == 0) { // Top left corner
+                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_TL, COLOR_WHITE, TB_256_BLACK);
+                } 
+                else if (row == 0 && column == c_box_width_limit) { // Top right corner
+                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_TR, COLOR_WHITE, TB_256_BLACK);
+                } 
+                else if (row == c_box_height_limit && column == 0) { // Bottom left corner
+                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_BL, COLOR_WHITE, TB_256_BLACK);
+                } 
+                else if (row == c_box_height_limit && column == c_box_width_limit) { // Bottom right corner
+                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_BR, COLOR_WHITE, TB_256_BLACK);
+                }
+                //TODO: Rotor mover keys.
+                else if (row == c_rotor_box_center_y && column >= c_rotor_box_center_x && column < c_rotor_box_center_x + rotor_number_str.size()) { // Print rotor number in the center
+                    char digit = rotor_number_str[column - c_rotor_box_center_x];
+                    tb_set_cell(rotor_x + column, rotor_y + row, digit, COLOR_GOLD, TB_256_BLACK);
+                }
+                else if ((row - c_rotor_box_center_y) % (1+intra_rotor_number_y) == 0 && abs(((row - c_rotor_box_center_y) / (1+intra_rotor_number_y))) == (shown_rotor_number_count-1)/2 && column >= c_rotor_box_center_x && column < c_rotor_box_center_x + rotor_number_str.size()) {
+                    int normalised = normalisePosition(-((row - c_rotor_box_center_y) / (1+intra_rotor_number_y)-1));
+                    string offset_rotor_number = get_rotor_number_as_str(normalised ? normalised : 26);
+                    char digit = offset_rotor_number[column - c_rotor_box_center_x];
+                    tb_set_cell(rotor_x + column, rotor_y + row, digit, COLOR_GOLD, TB_256_BLACK);
+                }
+                else if (row == 0 || row == c_box_height_limit) { // Horizontal lines
+                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_HL, COLOR_WHITE, TB_256_BLACK);
+                } 
+                else if (column == 0 || column == c_box_width_limit) { // Vertical lines
+                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_VL, COLOR_WHITE, TB_256_BLACK);
+                }
+            }
+        }
+    }
+
+}
+#pragma endregion
+
+#pragma region Display Loop
 int main() {
     try {
 
@@ -227,9 +310,9 @@ int main() {
             switch (state) {
                 case 0: // Intro Screen
                     draw_welcome_box();
-                    draw_enigma_title(center_element(((6*FONT_W)+5)), 4, COLOR_GOLD, TB_256_BLACK); // Removes the border characters then readds the left border.
-                    pretty_print("Press Enter to Start", center_element(20), 12, COLOR_GREEN, TB_256_BLACK); 
-                    pretty_print("Press Ctrl+Q to Quit", center_element(20), 14, COLOR_RED, TB_256_BLACK);
+                    draw_enigma_title(center(((6*FONT_W)+5) , outer_box_width), 4, COLOR_GOLD, TB_256_BLACK); 
+                    pretty_print("Press Enter to Start", center(20 , outer_box_width), 12, COLOR_GREEN, TB_256_BLACK); 
+                    pretty_print("Press Ctrl+Q to Quit", center(20, outer_box_width), 14, COLOR_RED, TB_256_BLACK);
 
                     if (ev.type == TB_EVENT_KEY ) {
                         if (ev.key == TB_KEY_ENTER) {
@@ -240,6 +323,7 @@ int main() {
                     break;
                 case 1: // Encryption
                     draw_outer_box();
+                    draw_rotor_assembly(enigma);
                 
                     break;
                 case 2: // Set Rotors
@@ -263,3 +347,4 @@ int main() {
         cout << "exception: " << e.what() << "\n";
     }
 }
+#pragma endregion
