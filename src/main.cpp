@@ -50,8 +50,9 @@ int main() {
         Plugboard plugboard = Plugboard(plugboardWiring);
         Enigma enigma = Enigma(rotors, reflector, plugboard);
 
+
         tb_init();
-	tb_set_output_mode(TB_OUTPUT_256);
+    	tb_set_output_mode(TB_OUTPUT_256);
 
         while (true) {
             tb_clear();
@@ -59,14 +60,13 @@ int main() {
             tb_event ev;
             tb_poll_event(&ev);
 
-            tb_set_cell(0 , 0 , encryptedChar , TB_WHITE , TB_BLACK);
+            // tb_set_cell(0 , 0 , encryptedChar , TB_WHITE , TB_BLACK);
 
             if (ev.type == TB_EVENT_KEY ) {
-		if (ev.key == TB_KEY_ESC) {
-		    break;
-		}
+                if (ev.key == TB_KEY_ESC) {
+                    break;
+                }
             }
-
 
             tb_present();
         } 

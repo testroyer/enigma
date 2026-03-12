@@ -358,6 +358,14 @@ namespace EnigmaMachine {
                 return character;
             }
 
+            // Rotate logic
+            for (auto rotor = rotors.begin() ; rotor != rotors.end() ; ++rotor) {
+                bool rotateNext = rotor->rotate();
+                if (!rotateNext) { // If the current rotor doesn't cause the next one to rotate or if it is the last rotor,
+                    break;
+                }
+            }
+
             /*
             Signal flow:
             Input -> Plugboard -> Rotors[] -> Reflector -> Rotors[] (reverse) -> Plugboard -> Output 
@@ -398,13 +406,6 @@ namespace EnigmaMachine {
             // Last plugbaord run
             currentCharacterState = this->plugboard.run(currentCharacterState);
 
-            // Rotate logic
-            for (auto rotor = rotors.begin() ; rotor != rotors.end() ; ++rotor) {
-                bool rotateNext = rotor->rotate();
-                if (!rotateNext) { // If the current rotor doesn't cause the next one to rotate or if it is the last rotor,
-                    break;
-                }
-            }
 
             return currentCharacterState;
 
