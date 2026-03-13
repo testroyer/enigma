@@ -63,21 +63,17 @@ constexpr int outer_box_height = rotor_box_height + lampboard_height - border;
 
 // Pixel font data for each letter (5 wide x 7 tall)
 const int FONT_W = 5;
-const int FONT_H = 7;
+const int FONT_H = 5;
 
 const bool letters[][FONT_H][FONT_W] = {
     // E
     {{1,1,1,1,1},
      {1,0,0,0,0},
-     {1,0,0,0,0},
      {1,1,1,1,0},
-     {1,0,0,0,0},
      {1,0,0,0,0},
      {1,1,1,1,1}},
     // N
     {{1,1,1,1,1},
-     {1,0,0,0,1},
-     {1,0,0,0,1},
      {1,0,0,0,1},
      {1,0,0,0,1},
      {1,0,0,0,1},
@@ -87,15 +83,11 @@ const bool letters[][FONT_H][FONT_W] = {
      {0,0,1,0,0},
      {0,0,1,0,0},
      {0,0,1,0,0},
-     {0,0,1,0,0},
-     {0,0,1,0,0},
      {1,1,1,1,1}},
     // G
     {{1,1,1,1,1},
      {1,0,0,0,0},
-     {1,0,0,0,0},
      {1,0,1,1,1},
-     {1,0,0,0,1},
      {1,0,0,0,1},
      {1,1,1,1,1}},
     // M
@@ -103,17 +95,13 @@ const bool letters[][FONT_H][FONT_W] = {
      {1,0,1,0,1},
      {1,0,1,0,1},
      {1,0,1,0,1},
-     {1,0,1,0,1},
-     {1,0,1,0,1},
      {1,0,1,0,1}},
     // A
     {{1,1,1,1,1},
      {1,0,0,0,1},
-     {1,0,0,0,1},
      {1,1,1,1,1},
      {1,0,0,0,1},
-     {1,0,0,0,1},
-     {1,0,0,0,1}},
+     {1,0,0,0,1}}
 };
 
 #pragma endregion
@@ -310,7 +298,7 @@ int main() {
             switch (state) {
                 case 0: // Intro Screen
                     draw_welcome_box();
-                    draw_enigma_title(center(((6*FONT_W)+5) , outer_box_width), 4, COLOR_GOLD, TB_256_BLACK); 
+                    draw_enigma_title(center(((6*FONT_W)+5) , outer_box_width), 5, COLOR_GOLD, TB_256_BLACK); 
                     pretty_print("Press Enter to Start", center(20 , outer_box_width), 12, COLOR_GREEN, TB_256_BLACK); 
                     pretty_print("Press Ctrl+Q to Quit", center(20, outer_box_width), 14, COLOR_RED, TB_256_BLACK);
 
