@@ -62,7 +62,7 @@ const vector<vector<uint32_t>> lampboard = {
 };
 
 // Define global dimensions
-constexpr int left_right_total_margin = 16; // In lamp/plugboard for now, must be a pair
+constexpr int left_right_total_margin = 12; // In lamp/plugboard for now, must be a pair
 constexpr int border = 1;
 
 //Rotor related 
@@ -74,7 +74,7 @@ constexpr int rotor_shown_number_lr_margin = 2;
 constexpr int rotor_element_updown_margin = 2;
 
 constexpr int rotor_element_width = shown_digit_count + 2*rotor_shown_number_lr_margin + 2*border; 
-constexpr int rotor_element_heigth = (shown_rotor_number_count + 2) + ((shown_rotor_number_count + 2) + 1)*intra_rotor_number_y + 2*border; // +2 are for mover characters
+constexpr int rotor_element_heigth = (shown_rotor_number_count + 2) + ((shown_rotor_number_count + 2) + 1)*intra_rotor_number_y + 2*border; // (shown_rotor_number_count + 2) are for mover characters
 
 //Lamp/Plugboard
 constexpr int max_key_per_lampboard_row = 9;
@@ -85,7 +85,7 @@ constexpr int plugboard_row_count = 3;
 
 //Boxes
 constexpr int rotor_box_height = rotor_element_heigth + 2*rotor_element_updown_margin + 2*border; 
-const int lampboard_height = plugboard_row_count + (plugboard_row_count-1)*intra_lampboard_row + 2*up_down_margin + 2*border; // Incl. TWO borders  
+constexpr int lampboard_height = plugboard_row_count + (plugboard_row_count-1)*intra_lampboard_row + 2*up_down_margin + 2*border;
 
 constexpr int outer_box_width = max_key_per_lampboard_row + ((max_key_per_lampboard_row-1)*intra_letter_gap) + 2*border+ left_right_total_margin; // À dynamiser, figurer si le clavier ou les rotors sont le plus grand
 constexpr int outer_box_height = rotor_box_height + lampboard_height - border; 
@@ -138,6 +138,9 @@ const bool letters[][FONT_H][FONT_W] = {
 
 
 #pragma region Helper lambdas
+
+std::function<void()> debug_action = nullptr;
+
 auto center = [](int size ,int outer_element_width , bool biggerGapFirst = false) -> int { 
     return (int)(((outer_element_width-2)-size)/2.0)+((int)(biggerGapFirst))+border; 
 };
@@ -242,7 +245,7 @@ void draw_enigma_title(int start_x, int start_y, int fg_color, int bg_color) { /
     }
 }
 
-void draw_rotor_assembly(Enigma enigma, bool mode_set) {
+void draw_rotor_assembly(Enigma enigma, bool mode_set = false ) {
     // Rotor assembly dimensions and positioning
     int brute_rotor_assembly_width = (enigma.rotors.size() * rotor_element_width) + ((enigma.rotors.size() - 1) * intra_rotor_gap);
     int rotor_assembly_start_x = center(brute_rotor_assembly_width , outer_box_width);
@@ -251,7 +254,8 @@ void draw_rotor_assembly(Enigma enigma, bool mode_set) {
     //Get border placements
     for (int i = 0; i < enigma.rotors.size(); i++) {
         //Top-left of the current rotor box
-        int rotor_x = rotor_assembly_start_x + i * (rotor_element_width + intra_rotor_gap);
+        int reversed_i = enigma.rotors.size() - 1 - i;
+        int rotor_x = rotor_assembly_start_x + reversed_i * (rotor_element_width + intra_rotor_gap);
         int rotor_y = rotor_assembly_start_y;
 
         int c_box_width_limit = rotor_element_width - 1; // Adjust for 0-based indexing
@@ -315,6 +319,25 @@ void draw_rotor_assembly(Enigma enigma, bool mode_set) {
 
 }
 
+void draw_keyboard(uint32_t last_char = 0x0000 ,bool mode_set = false) {
+    int lampboard_assembly_width = max_key_per_lampboard_row + (max_key_per_lampboard_row + 1)*intra_letter_gap;
+    int lampboard_assembly_height = plugboard_row_count + ((plugboard_row_count-1) * intra_lampboard_row);
+    int outer_x = center(lampboard_assembly_width, outer_box_width);
+    int outer_y = center(lampboard_assembly_height , lampboard_height);
+
+    for (int row = 0; row < lampboard.size() ; row++){
+        int rowSize = lampboard[row].size();
+        int inner_x = center((rowSize + (rowSize-1)*intra_letter_gap) , lampboard_assembly_width); 
+        for (int column = 0; column < rowSize; column++ ){
+            int raw_row = outer_y + rotor_box_height + row*(intra_lampboard_row+1) - 1;
+            int raw_column = outer_x + inner_x + column*(intra_letter_gap+1);
+            if (!mode_set) {
+                tb_set_cell(raw_column , raw_row , lampboard[row][column] , COLOR_WHITE , (lampboard[row][column] == last_char ? COLOR_BLUE : TB_256_BLACK));
+            }
+        }
+    }
+
+}
 
 #pragma endregion
 
@@ -341,10 +364,9 @@ int main() {
     	tb_set_output_mode(TB_OUTPUT_256);
         tb_set_input_mode(TB_INPUT_ESC);
         //State variables
-        uint32_t lastPressed = ' ';
+        uint32_t lastPressed = 0x0000;
         int state = 0; // 0 = Intro Screen, 1 = Encryption, 2 = Set Rotors
         bool running = true;
-        std::function<void()> debug_action = nullptr;
 
         while (running) {
             tb_clear();
@@ -365,6 +387,7 @@ int main() {
                 case 1: { // Encryption
                     draw_outer_box();
                     draw_rotor_assembly(enigma , false);
+                    draw_keyboard(lastPressed);
                     if (debug_action) { debug_action(); debug_action = nullptr;}
                 
                     break;
@@ -372,6 +395,7 @@ int main() {
                 case 2: { // Set Rotors
                     draw_outer_box();
                     draw_rotor_assembly(enigma , true);
+                    draw_keyboard();
                     if (debug_action) { debug_action(); debug_action = nullptr;}
                 
                     break;
@@ -400,6 +424,9 @@ int main() {
                             debug_action = [&]() -> void {
                                 pretty_print("Switched to \"Set\" mode" , 0 , outer_box_height+1 , COLOR_WHITE , COLOR_YELLOW);
                             };
+                        }
+                        if (checkIfEngimaEnabledChar(toupper(ev.ch))){
+                            lastPressed = enigma.encrypt(ev.ch);
                         }
                         break;
                     }
