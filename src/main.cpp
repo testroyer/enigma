@@ -404,7 +404,8 @@ int main() {
                     draw_welcome_box();
                     draw_enigma_title(center(((6*FONT_W)+5) , outer_box_width), 5, COLOR_GOLD, TB_256_BLACK); 
                     pretty_print("Press Enter to Start", center(20 , outer_box_width), 12, COLOR_GREEN, TB_256_BLACK); 
-                    pretty_print("Press Ctrl+Q to Quit", center(20, outer_box_width), 14, COLOR_RED, TB_256_BLACK);
+                    pretty_print("Press SPCACE to change modes", center(28, outer_box_width), 14, COLOR_BLUE , TB_256_BLACK);
+                    pretty_print("Press Ctrl+Q to Quit", center(20, outer_box_width), 16, COLOR_RED, TB_256_BLACK);
 
                     if (debug_action) { debug_action(); debug_action = nullptr;}
 
