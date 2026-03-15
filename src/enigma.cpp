@@ -248,6 +248,10 @@ namespace EnigmaMachine {
             checkAndThrowIfNotEnigmaEnabledChar(first, this);
             checkAndThrowIfNotEnigmaEnabledChar(second, this);
 
+            if (first == second) {
+                throw runtime_error("Error: cannot connect a plug to itself.");
+            }
+
             if (this->connections.size() == maximumConnections) {
                 throw runtime_error("Error: Maximum number of connections reached.");
             }

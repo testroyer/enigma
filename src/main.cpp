@@ -47,6 +47,22 @@ using namespace EnigmaMachine;
 #define COLOR_TEAL        43  // vibrant teal
 #define COLOR_GRAY       244  // medium gray
 
+constexpr int plugboard_colors[13] = {
+    COLOR_RED , 
+    COLOR_GREEN , 
+    COLOR_YELLOW , 
+    COLOR_BLUE , 
+    COLOR_MAGENTA , 
+    COLOR_CYAN , 
+    COLOR_ORANGE, 
+    COLOR_PINK ,
+    COLOR_PURPLE ,
+    COLOR_LIME , 
+    COLOR_SKY_BLUE , 
+    COLOR_TEAL,
+    COLOR_GOLD,
+};
+
 constexpr int expected_rotor_count = 3;
 
 // Key bindings
@@ -319,7 +335,7 @@ void draw_rotor_assembly(Enigma enigma, bool mode_set = false ) {
 
 }
 
-void draw_keyboard(uint32_t last_char = 0x0000 ,bool mode_set = false) {
+void draw_keyboard(Enigma enigma, uint32_t last_char = 0x0000 ,bool mode_set = false) {
     int lampboard_assembly_width = max_key_per_lampboard_row + (max_key_per_lampboard_row + 1)*intra_letter_gap;
     int lampboard_assembly_height = plugboard_row_count + ((plugboard_row_count-1) * intra_lampboard_row);
     int outer_x = center(lampboard_assembly_width, outer_box_width);
@@ -333,6 +349,13 @@ void draw_keyboard(uint32_t last_char = 0x0000 ,bool mode_set = false) {
             int raw_column = outer_x + inner_x + column*(intra_letter_gap+1);
             if (!mode_set) {
                 tb_set_cell(raw_column , raw_row , lampboard[row][column] , COLOR_WHITE , (lampboard[row][column] == last_char ? COLOR_BLUE : TB_256_BLACK));
+            }else {
+                vector<pair<char , char>> couplings = enigma.plugboard.getConnections().getPairs();
+                auto it = find_if(couplings.begin() , couplings.end() , [&row , &column](const auto& p){
+                    return lampboard[row][column] == (uint32_t)p.first || lampboard[row][column] == (uint32_t)p.second;
+                });
+                tb_set_cell(raw_column, raw_row , lampboard[row][column] , (it == couplings.end()) ? COLOR_WHITE : plugboard_colors[it - couplings.begin()] , TB_256_BLACK);
+
             }
         }
     }
@@ -355,7 +378,7 @@ int main() {
             return 1;
         }
         Reflector reflector = Reflector("YRUHQSLDPXNGOKMIEBFZCWVJAT");
-        Bipair<char> plugboardWiring = Bipair<char>({{'A', 'C'}});
+        Bipair<char> plugboardWiring = Bipair<char>({{'Q', 'W'}});
         Plugboard plugboard = Plugboard(plugboardWiring);
         Enigma enigma = Enigma(rotors, reflector, plugboard);
 
@@ -363,10 +386,13 @@ int main() {
         tb_init();
     	tb_set_output_mode(TB_OUTPUT_256);
         tb_set_input_mode(TB_INPUT_ESC);
+
         //State variables
         uint32_t lastPressed = 0x0000;
         int state = 0; // 0 = Intro Screen, 1 = Encryption, 2 = Set Rotors
         bool running = true;
+        pair<uint32_t , uint32_t> primal_connection = {0x0000 , 0x0000};
+
 
         while (running) {
             tb_clear();
@@ -387,7 +413,7 @@ int main() {
                 case 1: { // Encryption
                     draw_outer_box();
                     draw_rotor_assembly(enigma , false);
-                    draw_keyboard(lastPressed);
+                    draw_keyboard(enigma, lastPressed);
                     if (debug_action) { debug_action(); debug_action = nullptr;}
                 
                     break;
@@ -395,7 +421,7 @@ int main() {
                 case 2: { // Set Rotors
                     draw_outer_box();
                     draw_rotor_assembly(enigma , true);
-                    draw_keyboard();
+                    draw_keyboard(enigma , 0x0000 , true);
                     if (debug_action) { debug_action(); debug_action = nullptr;}
                 
                     break;
@@ -418,6 +444,7 @@ int main() {
                         }
                         break;
                     }
+
                     case 1: {//Encrypt
                         if (ev.ch == TB_KEY_SPACE) {
                             state = 2;
@@ -430,13 +457,52 @@ int main() {
                         }
                         break;
                     }
-                    case 2: { // Set rotors 
+
+                    case 2: { // Set 
                         if (ev.ch == TB_KEY_SPACE) {
                             state = 1;
+                            primal_connection.first = 0x0000;
+                            primal_connection.second = 0x0000;
                             debug_action = [&]() -> void {
                                 pretty_print("Switched to \"Encrypt\" mode" , 0 , outer_box_height+1 , COLOR_WHITE , COLOR_YELLOW);
                             };
                         } 
+
+                        if (checkIfEngimaEnabledChar(toupper(ev.ch))) {
+                            if (primal_connection.first == 0x0000){
+                                primal_connection.first = toupper(ev.ch);
+                                debug_action = [&]() -> void {
+                                    pretty_print(string("Listening for couple of: ") + (char)primal_connection.first, 0, outer_box_height+1, COLOR_WHITE, COLOR_CYAN);
+                                };
+                                break;
+                            } else if(primal_connection.second == 0x0000) {
+                                primal_connection.second = toupper(ev.ch); // I see this may be unneeded but best practice is to keep to avoid possible confusion later
+                                try {
+                                    pair<char, char> new_connection = {(char)primal_connection.first , (char)primal_connection.second};
+                                    if (enigma.plugboard.getConnections().checkExactPairExistence(new_connection)) {
+                                        uint32_t a = primal_connection.first; //Capture before thay are gone
+                                        uint32_t b = primal_connection.second;
+                                        debug_action = [a , b]() -> void {
+                                            pretty_print((string("Removed: ") + (char)a + string("-") +(char)b) , 0 , outer_box_height+1 , COLOR_WHITE , COLOR_RED);
+                                        };
+                                        enigma.plugboard.removeConnection(new_connection);
+                                    } else {
+                                        enigma.plugboard.addConnection(new_connection);
+                                    }
+                                } catch (std::exception& e) {
+                                    debug_action = [&]() -> void {
+                                        pretty_print(e.what() , 0 , outer_box_height+1 ,COLOR_WHITE , COLOR_RED);
+                                    };
+                                    break;
+                                }
+                                primal_connection.first = 0x0000;
+                                primal_connection.second = 0x0000;
+                                break;
+
+                            }
+                        }
+                        if (primal_connection.first != 0x0000)
+                        primal_connection = {0x0000 , 0x0000}; //reset the primal connections if not caught any
 
                         auto rot_keybind = find_rotor_keybind(ev.ch);
                         if (rot_keybind.first) {

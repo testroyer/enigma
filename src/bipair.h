@@ -70,9 +70,15 @@ class Bipair {
             return pairs;
         }
         
-        bool checkPairExistence(const T& first, const T& second) const {
+        bool checkPairExistence(const T& first, const T& second) const { // checks if any is present
             return pairs.end() != std::find_if(pairs.begin() , pairs.end() , [&first , &second](const auto& p){
                 return (p.first == first || p.second == first) || (p.first == second || p.second == second);
+            }); 
+        };
+        
+        bool checkExactPairExistence(const std::pair<T,T>& param) const {
+            return pairs.end() != std::find_if(pairs.begin() , pairs.end() , [&param](const auto& p){
+                return (p.first == param.first && p.second == param.second) || (p.first == param.second && p.second == param.first);
             }); 
         };
 
