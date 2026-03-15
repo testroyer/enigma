@@ -8,7 +8,10 @@
 #define TB_IMPL
 #include "../external/termbox2/termbox2.h"
 
-#pragma region Definitions
+using namespace std;
+using namespace EnigmaMachine;
+
+#pragma region Global Definitions
 
 // Constant definitions of ASCII box building characters
 #define BOX_TL 0x250C // Top left corner 
@@ -43,6 +46,14 @@
 #define COLOR_GOLD       220  // golden yellow
 #define COLOR_TEAL        43  // vibrant teal
 #define COLOR_GRAY       244  // medium gray
+
+constexpr int expected_rotor_count = 3;
+
+// Key bindings
+uint32_t rotor_key_bindings[2][3] = { //Up then down.
+    {0x005B , 0x003B , 0x002E},
+    {0x005D , 0x0027 , 0x002F}
+};
 
 // Define global dimensions
 constexpr int intra_letter_gap = 3;
@@ -111,12 +122,9 @@ const bool letters[][FONT_H][FONT_W] = {
 
 #pragma endregion
 
-using namespace std;
-using namespace EnigmaMachine;
 
-constexpr int expected_rotor_count = 3;
 
-//Helper lambdas
+#pragma region Helper lambdas
 auto center = [](int size ,int outer_element_width , bool biggerGapFirst = false) -> int { 
     return (int)(((outer_element_width-2)-size)/2.0)+((int)(biggerGapFirst))+border; 
 };
@@ -125,11 +133,6 @@ auto get_rotor_number_as_str = [](int active_rotor_number) -> string {
     return to_string(active_rotor_number).length() == 1 ? "0" + to_string(active_rotor_number) : to_string(active_rotor_number); // Pad with zero if single digit 
 };
 
-// Key bindings
-uint32_t rotor_key_bindings[2][3] = { //Up then down.
-    {0x005B , 0x003B , 0x002E},
-    {0x005D , 0x0027 , 0x002F}
-};
 
 auto find_rotor_keybind = [](uint32_t key) -> pair<bool, pair<int, int>> {
     for (int r = 0; r < 2; r++) {
@@ -141,6 +144,7 @@ auto find_rotor_keybind = [](uint32_t key) -> pair<bool, pair<int, int>> {
     }
     return {false , {0,0}};
 };
+#pragma endregion
 
 #pragma region Drawer Functions
 void draw_outer_box() {
