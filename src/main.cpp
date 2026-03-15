@@ -362,13 +362,21 @@ void draw_keyboard(Enigma enigma, uint32_t last_char = 0x0000 ,bool mode_set = f
 
 }
 
+void debug_info() { //Hardcoded info
+    pretty_print("1930 Enigma I with rotors I, II and III, reflector B" , outer_box_width+1 , 1 , COLOR_WHITE , TB_256_BLACK);
+    pretty_print("Rotor 1:   EKMFLGDQVZNTOWYHXUSPAIBRCJ" , outer_box_width+1 , 2 , COLOR_WHITE , TB_256_BLACK);
+    pretty_print("Rotor 2:   AJDKSIRUXBLHWTMCQGZNPYFVOE" , outer_box_width+1 , 3 , COLOR_WHITE , TB_256_BLACK);
+    pretty_print("Rotor 3:   BDFHJLCPRTXVZNYEIWGAKMUSQO" , outer_box_width+1 , 4 , COLOR_WHITE , TB_256_BLACK);
+    pretty_print("Reflector: YRUHQSLDPXNGOKMIEBFZCWVJAT" , outer_box_width+1 , 5 , COLOR_WHITE , TB_256_BLACK);
+}
+
 #pragma endregion
 
 #pragma region Display Loop
 int main() {
     try {
 
-        // 1930 Enigma I with rotors I, II and III, reflector B and plugboard connection A-C.
+        // 1930 Enigma I with rotors I, II and III, reflector B 
         Rotor first  = Rotor("EKMFLGDQVZNTOWYHXUSPAIBRCJ", 0, 16);
         Rotor second = Rotor("AJDKSIRUXBLHWTMCQGZNPYFVOE", 0, 4);
         Rotor third  = Rotor("BDFHJLCPRTXVZNYEIWGAKMUSQO", 0, 21);
@@ -415,6 +423,7 @@ int main() {
                     draw_outer_box();
                     draw_rotor_assembly(enigma , false);
                     draw_keyboard(enigma, lastPressed);
+                    debug_info();
                     if (debug_action) { debug_action(); debug_action = nullptr;}
                 
                     break;
@@ -423,6 +432,7 @@ int main() {
                     draw_outer_box();
                     draw_rotor_assembly(enigma , true);
                     draw_keyboard(enigma , 0x0000 , true);
+                    debug_info();
                     if (debug_action) { debug_action(); debug_action = nullptr;}
                 
                     break;
