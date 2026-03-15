@@ -2,12 +2,13 @@
 #include "./bipair.h"
 #include "./enigma.h"
 #include <vector>
+#include <functional>
 #include <cmath>
 
 #define TB_IMPL
 #include "../external/termbox2/termbox2.h"
 
-#pragma region Termbox Definitions
+#pragma region Definitions
 
 // Constant definitions of ASCII box building characters
 #define BOX_TL 0x250C // Top left corner 
@@ -22,6 +23,9 @@
 #define BOX_T_RIGHT 0x251C // ├ T pointing right
 #define BOX_T_LEFT  0x2524 // ┤ T pointing left
 #define BOX_CROSS   0x253C // ┼ Cross
+
+#define ARROW_UP   0x2191 //↑
+#define ARROW_DOWN 0x2193 //↓
 
 #define COLOR_BLACK      0    // black
 #define COLOR_RED        1    // red
@@ -38,6 +42,7 @@
 #define COLOR_SKY_BLUE   117  // bright sky blue
 #define COLOR_GOLD       220  // golden yellow
 #define COLOR_TEAL        43  // vibrant teal
+#define COLOR_GRAY       244  // medium gray
 
 // Define global dimensions
 constexpr int intra_letter_gap = 3;
@@ -45,7 +50,7 @@ constexpr int left_right_total_margin = 16;
 constexpr int border = 1;
 
 constexpr int intra_rotor_gap = 1;
-constexpr int intra_rotor_number_y = 1;
+constexpr int intra_rotor_number_y = 1; // Gap between rotor numbers
 constexpr int shown_rotor_number_count = 3; //Always an odd number to have a center rotor number 
 constexpr int shown_digit_count = 2; // For displaying rotor numbers as 01, 02, etc.
 constexpr int rotor_shown_number_lr_margin = 2;
@@ -109,6 +114,8 @@ const bool letters[][FONT_H][FONT_W] = {
 using namespace std;
 using namespace EnigmaMachine;
 
+constexpr int expected_rotor_count = 3;
+
 //Helper lambdas
 auto center = [](int size ,int outer_element_width , bool biggerGapFirst = false) -> int { 
     return (int)(((outer_element_width-2)-size)/2.0)+((int)(biggerGapFirst))+border; 
@@ -118,6 +125,22 @@ auto get_rotor_number_as_str = [](int active_rotor_number) -> string {
     return to_string(active_rotor_number).length() == 1 ? "0" + to_string(active_rotor_number) : to_string(active_rotor_number); // Pad with zero if single digit 
 };
 
+// Key bindings
+uint32_t rotor_key_bindings[2][3] = { //Up then down.
+    {0x005B , 0x003B , 0x002E},
+    {0x005D , 0x0027 , 0x002F}
+};
+
+auto find_rotor_keybind = [](uint32_t key) -> pair<bool, pair<int, int>> {
+    for (int r = 0; r < 2; r++) {
+        for (int c = 0; c < expected_rotor_count; c++ ) {
+            if (rotor_key_bindings[r][c] == key){
+                return {true , {r,c}};
+            }
+        }
+    }
+    return {false , {0,0}};
+};
 
 #pragma region Drawer Functions
 void draw_outer_box() {
@@ -203,7 +226,7 @@ void draw_enigma_title(int start_x, int start_y, int fg_color, int bg_color) { /
     }
 }
 
-void draw_rotor_assembly(Enigma enigma) {
+void draw_rotor_assembly(Enigma enigma, bool mode_set) {
     // Rotor assembly dimensions and positioning
     int brute_rotor_assembly_width = (enigma.rotors.size() * rotor_element_width) + ((enigma.rotors.size() - 1) * intra_rotor_gap);
     int rotor_assembly_start_x = center(brute_rotor_assembly_width , outer_box_width);
@@ -239,16 +262,30 @@ void draw_rotor_assembly(Enigma enigma) {
                 else if (row == c_box_height_limit && column == c_box_width_limit) { // Bottom right corner
                     tb_set_cell(rotor_x + column, rotor_y + row, BOX_BR, COLOR_WHITE, TB_256_BLACK);
                 }
-                //TODO: Rotor mover keys.
-                else if (row == c_rotor_box_center_y && column >= c_rotor_box_center_x && column < c_rotor_box_center_x + rotor_number_str.size()) { // Print rotor number in the center
+                else if (row == c_rotor_box_center_y && 
+                    column >= c_rotor_box_center_x && 
+                    column < c_rotor_box_center_x + rotor_number_str.size()) { // Print rotor number in the center
+
                     char digit = rotor_number_str[column - c_rotor_box_center_x];
                     tb_set_cell(rotor_x + column, rotor_y + row, digit, COLOR_GOLD, TB_256_BLACK);
                 }
-                else if ((row - c_rotor_box_center_y) % (1+intra_rotor_number_y) == 0 && abs(((row - c_rotor_box_center_y) / (1+intra_rotor_number_y))) == (shown_rotor_number_count-1)/2 && column >= c_rotor_box_center_x && column < c_rotor_box_center_x + rotor_number_str.size()) {
-                    int normalised = normalisePosition(-((row - c_rotor_box_center_y) / (1+intra_rotor_number_y)-1));
+                else if ((row - c_rotor_box_center_y) % (1+intra_rotor_number_y) == 0 && 
+                    abs(((row - c_rotor_box_center_y) / (1+intra_rotor_number_y))) == (shown_rotor_number_count-1)/2 && 
+                    column >= c_rotor_box_center_x && 
+                    column < c_rotor_box_center_x + rotor_number_str.size()) {
+
+                    int normalised = normalisePosition(current_rotor_number + (-(row-c_rotor_box_center_y)) / (intra_rotor_number_y+1));
                     string offset_rotor_number = get_rotor_number_as_str(normalised ? normalised : 26);
                     char digit = offset_rotor_number[column - c_rotor_box_center_x];
-                    tb_set_cell(rotor_x + column, rotor_y + row, digit, COLOR_GOLD, TB_256_BLACK);
+                    tb_set_cell(rotor_x + column, rotor_y + row, digit, COLOR_WHITE, TB_256_BLACK);
+                }
+                else if ((row - c_rotor_box_center_y) % (1+intra_rotor_number_y) == 0 &&
+                    abs(((row - c_rotor_box_center_y) / (1+intra_rotor_number_y))) == ((shown_rotor_number_count-1)/2)+1 && 
+                    column >= c_rotor_box_center_x && 
+                    column < c_rotor_box_center_x + rotor_number_str.size()) {
+
+                    uint32_t digit = (column - c_rotor_box_center_x) == 0 ? rotor_key_bindings[(row-c_rotor_box_center_y)>0][i] : ((row-c_rotor_box_center_y)>0) ? ARROW_DOWN : ARROW_UP;
+                    tb_set_cell(rotor_x + column, rotor_y + row, digit, COLOR_WHITE, (mode_set ? COLOR_BLUE : TB_256_BLACK));
                 }
                 else if (row == 0 || row == c_box_height_limit) { // Horizontal lines
                     tb_set_cell(rotor_x + column, rotor_y + row, BOX_HL, COLOR_WHITE, TB_256_BLACK);
@@ -272,6 +309,10 @@ int main() {
         Rotor second = Rotor("AJDKSIRUXBLHWTMCQGZNPYFVOE", 0, 4);
         Rotor third  = Rotor("BDFHJLCPRTXVZNYEIWGAKMUSQO", 0, 21);
         vector<Rotor> rotors = {first, second, third};
+        if (rotors.size() != expected_rotor_count) {
+            cout << "Error rotors size does not match expected rotors count.";
+            return 1;
+        }
         Reflector reflector = Reflector("YRUHQSLDPXNGOKMIEBFZCWVJAT");
         Bipair<char> plugboardWiring = Bipair<char>({{'A', 'C'}});
         Plugboard plugboard = Plugboard(plugboardWiring);
@@ -280,51 +321,94 @@ int main() {
 
         tb_init();
     	tb_set_output_mode(TB_OUTPUT_256);
+        tb_set_input_mode(TB_INPUT_ESC);
+        //State variables
         char lastPressed = ' ';
-        int state = 0; // 0 = Intro Screen, 1 = Encryption, 2 = Set Rotors, 3 = Set Plugboard
+        int state = 0; // 0 = Intro Screen, 1 = Encryption, 2 = Set Rotors
+        bool running = true;
+        std::function<void()> debug_action = nullptr;
 
-        while (true) {
+        while (running) {
             tb_clear();
             
-            tb_event ev;
-            tb_poll_event(&ev);
-            if (ev.type == TB_EVENT_KEY ) {
-                if (ev.key == TB_KEY_CTRL_Q) {
-                    break;
-                }
-            }
 
 
             switch (state) {
-                case 0: // Intro Screen
+                case 0: {// Intro Screen
                     draw_welcome_box();
                     draw_enigma_title(center(((6*FONT_W)+5) , outer_box_width), 5, COLOR_GOLD, TB_256_BLACK); 
                     pretty_print("Press Enter to Start", center(20 , outer_box_width), 12, COLOR_GREEN, TB_256_BLACK); 
                     pretty_print("Press Ctrl+Q to Quit", center(20, outer_box_width), 14, COLOR_RED, TB_256_BLACK);
 
-                    if (ev.type == TB_EVENT_KEY ) {
+                    if (debug_action) { debug_action(); debug_action = nullptr;}
+
+                    break;
+                }
+                case 1: { // Encryption
+                    draw_outer_box();
+                    draw_rotor_assembly(enigma , false);
+                    if (debug_action) { debug_action(); debug_action = nullptr;}
+                
+                    break;
+                }
+                case 2: { // Set Rotors
+                    draw_outer_box();
+                    draw_rotor_assembly(enigma , true);
+                    if (debug_action) { debug_action(); debug_action = nullptr;}
+                
+                    break;
+                }
+            }
+            
+            tb_present();
+
+            tb_event ev;
+            tb_poll_event(&ev);
+            if (ev.type != TB_EVENT_KEY ) continue;;
+            if (ev.type == TB_EVENT_KEY ) {
+                if (ev.key == TB_KEY_CTRL_Q) {
+                    running = false;
+                }
+                switch (state){
+                    case 0: { // Intro screen
                         if (ev.key == TB_KEY_ENTER) {
                             state = 1; // Move to encryption screen
                         }
+                        break;
                     }
+                    case 1: {//Encrypt
+                        if (ev.ch == TB_KEY_SPACE) {
+                            state = 2;
+                            debug_action = [&]() -> void {
+                                pretty_print("Switched to \"Set\" mode" , 0 , outer_box_height+1 , COLOR_WHITE , COLOR_YELLOW);
+                            };
+                        }
+                        break;
+                    }
+                    case 2: { // Set rotors 
+                        if (ev.ch == TB_KEY_SPACE) {
+                            state = 1;
+                            debug_action = [&]() -> void {
+                                pretty_print("Switched to \"Encrypt\" mode" , 0 , outer_box_height+1 , COLOR_WHITE , COLOR_YELLOW);
+                            };
+                        } 
 
-                    break;
-                case 1: // Encryption
-                    draw_outer_box();
-                    draw_rotor_assembly(enigma);
+                        auto rot_keybind = find_rotor_keybind(ev.ch);
+                        if (rot_keybind.first) {
+                            vector<int> current_rotor_pos = enigma.getRotorPositions();
+                            current_rotor_pos[rot_keybind.second.second] += (rot_keybind.second.first == 0 ? 1 : -1);
+                            current_rotor_pos[rot_keybind.second.second] = normalisePosition(current_rotor_pos[rot_keybind.second.second]);
+                            enigma.setRotorPositions(current_rotor_pos);
+                        }
+                        break;
+                    }
+                }
                 
-                    break;
-                case 2: // Set Rotors
-                    draw_outer_box();
-                
-                    break;
-                case 3: // Set Plugboard
-                    draw_outer_box();
-
-                    break;
             }
+            char dbg[64];
+            snprintf(dbg, sizeof(dbg), "type:%d key:%d ch:%d", ev.type, ev.key, ev.ch);
+            pretty_print(dbg, 0, outer_box_height+2, COLOR_WHITE, TB_256_BLACK);
 
-            tb_present();
         } 
     
         tb_shutdown();
@@ -333,6 +417,7 @@ int main() {
       
     } catch (const std::exception& e) {
         cout << "exception: " << e.what() << "\n";
+        return 1;
     }
 }
 #pragma endregion
