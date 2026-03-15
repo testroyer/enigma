@@ -55,11 +55,17 @@ uint32_t rotor_key_bindings[2][3] = { //Up then down.
     {0x005D , 0x0027 , 0x002F}
 };
 
+const vector<vector<uint32_t>> lampboard = {
+    {'Q' , 'W' , 'E' , 'R' , 'T' , 'Z' , 'U' , 'I' , 'O'},
+       {'A' , 'S' , 'D' , 'F' , 'G' , 'H' , 'J' , 'K'},
+    {'P' , 'Y' , 'X' , 'C' , 'V' , 'B' , 'N' , 'M' , 'L'}
+};
+
 // Define global dimensions
-constexpr int intra_letter_gap = 3;
-constexpr int left_right_total_margin = 16;
+constexpr int left_right_total_margin = 16; // In lamp/plugboard for now, must be a pair
 constexpr int border = 1;
 
+//Rotor related 
 constexpr int intra_rotor_gap = 1;
 constexpr int intra_rotor_number_y = 1; // Gap between rotor numbers
 constexpr int shown_rotor_number_count = 3; //Always an odd number to have a center rotor number 
@@ -70,12 +76,19 @@ constexpr int rotor_element_updown_margin = 2;
 constexpr int rotor_element_width = shown_digit_count + 2*rotor_shown_number_lr_margin + 2*border; 
 constexpr int rotor_element_heigth = (shown_rotor_number_count + 2) + ((shown_rotor_number_count + 2) + 1)*intra_rotor_number_y + 2*border; // +2 are for mover characters
 
+//Lamp/Plugboard
+constexpr int max_key_per_lampboard_row = 9;
+constexpr int intra_letter_gap = 3;
+constexpr int intra_lampboard_row = 1;
+constexpr int up_down_margin = 2;
+constexpr int plugboard_row_count = 3;
+
+//Boxes
 constexpr int rotor_box_height = rotor_element_heigth + 2*rotor_element_updown_margin + 2*border; 
-constexpr int lampboard_height = 11; // Incl. TWO borders, À dynamiser
+const int lampboard_height = plugboard_row_count + (plugboard_row_count-1)*intra_lampboard_row + 2*up_down_margin + 2*border; // Incl. TWO borders  
 
-constexpr int outer_box_width = 9 + (8*intra_letter_gap) + 2*border+ left_right_total_margin; // À dynamiser
+constexpr int outer_box_width = max_key_per_lampboard_row + ((max_key_per_lampboard_row-1)*intra_letter_gap) + 2*border+ left_right_total_margin; // À dynamiser, figurer si le clavier ou les rotors sont le plus grand
 constexpr int outer_box_height = rotor_box_height + lampboard_height - border; 
-
 
 // Pixel font data for each letter (5 wide x 7 tall)
 const int FONT_W = 5;
@@ -132,7 +145,6 @@ auto center = [](int size ,int outer_element_width , bool biggerGapFirst = false
 auto get_rotor_number_as_str = [](int active_rotor_number) -> string {
     return to_string(active_rotor_number).length() == 1 ? "0" + to_string(active_rotor_number) : to_string(active_rotor_number); // Pad with zero if single digit 
 };
-
 
 auto find_rotor_keybind = [](uint32_t key) -> pair<bool, pair<int, int>> {
     for (int r = 0; r < 2; r++) {
@@ -302,6 +314,8 @@ void draw_rotor_assembly(Enigma enigma, bool mode_set) {
     }
 
 }
+
+
 #pragma endregion
 
 #pragma region Display Loop
@@ -327,7 +341,7 @@ int main() {
     	tb_set_output_mode(TB_OUTPUT_256);
         tb_set_input_mode(TB_INPUT_ESC);
         //State variables
-        char lastPressed = ' ';
+        uint32_t lastPressed = ' ';
         int state = 0; // 0 = Intro Screen, 1 = Encryption, 2 = Set Rotors
         bool running = true;
         std::function<void()> debug_action = nullptr;
