@@ -47,6 +47,9 @@ using namespace EnigmaMachine;
 #define COLOR_TEAL        43  // vibrant teal
 #define COLOR_GRAY       244  // medium gray
 
+#define FOREGROUND COLOR_WHITE
+#define BACKGROUND TB_256_BLACK
+
 constexpr int plugboard_colors[13] = {
     COLOR_RED , 
     COLOR_GREEN , 
@@ -185,28 +188,28 @@ void draw_outer_box() {
     for (int column = 0 ; column <= c_box_width_limit; column++){
         for (int row = 0; row <= c_box_height_limit; row++) {
             if (row == 0 && column == 0) { // Top left corner
-                tb_set_cell(column, row , BOX_TL , COLOR_WHITE , TB_256_BLACK);
+                tb_set_cell(column, row , BOX_TL , FOREGROUND , BACKGROUND);
             } 
             else if (row == 0 && column == c_box_width_limit) { // Top right corner
-                tb_set_cell(column, row , BOX_TR , COLOR_WHITE , TB_256_BLACK);
+                tb_set_cell(column, row , BOX_TR , FOREGROUND , BACKGROUND);
             } 
             else if (row == c_box_height_limit && column == 0) { // Bottom left corner
-                tb_set_cell(column, row , BOX_BL , COLOR_WHITE , TB_256_BLACK);
+                tb_set_cell(column, row , BOX_BL , FOREGROUND , BACKGROUND);
             } 
             else if (row == c_box_height_limit && column == c_box_width_limit) { // Bottom right corner
-                tb_set_cell(column, row , BOX_BR , COLOR_WHITE , TB_256_BLACK);
+                tb_set_cell(column, row , BOX_BR , FOREGROUND , BACKGROUND);
             }
             else if (row == rotor_box_height-1 && column == 0) { // T pointing down on left edge
-                tb_set_cell(column, row , BOX_T_RIGHT , COLOR_WHITE , TB_256_BLACK);
+                tb_set_cell(column, row , BOX_T_RIGHT , FOREGROUND , BACKGROUND);
             }
             else if (row == rotor_box_height-1 && column == c_box_width_limit) { // T pointing down on right edge
-                tb_set_cell(column, row , BOX_T_LEFT , COLOR_WHITE , TB_256_BLACK);
+                tb_set_cell(column, row , BOX_T_LEFT , FOREGROUND , BACKGROUND);
             } 
             else if (row == 0 || row == rotor_box_height-1 || row == c_box_height_limit) { // Horizontal lines
-                tb_set_cell(column, row , BOX_HL , COLOR_WHITE , TB_256_BLACK);
+                tb_set_cell(column, row , BOX_HL , FOREGROUND , BACKGROUND);
             } 
             else if (column == 0 || column == c_box_width_limit) { // Vertical lines
-                tb_set_cell(column, row , BOX_VL , COLOR_WHITE , TB_256_BLACK);
+                tb_set_cell(column, row , BOX_VL , FOREGROUND , BACKGROUND);
             }
         }
     }
@@ -219,28 +222,28 @@ void draw_welcome_box() {
     for (int column = 0 ; column <= c_box_width_limit; column++){
         for (int row = 0; row <= c_box_height_limit; row++) {
             if (row == 0 && column == 0) { // Top left corner
-                tb_set_cell(column, row , BOX_TL , COLOR_WHITE , TB_256_BLACK);
+                tb_set_cell(column, row , BOX_TL , FOREGROUND , BACKGROUND);
             } 
             else if (row == 0 && column == c_box_width_limit) { // Top right corner
-                tb_set_cell(column, row , BOX_TR , COLOR_WHITE , TB_256_BLACK);
+                tb_set_cell(column, row , BOX_TR , FOREGROUND , BACKGROUND);
             } 
             else if (row == c_box_height_limit && column == 0) { // Bottom left corner
-                tb_set_cell(column, row , BOX_BL , COLOR_WHITE , TB_256_BLACK);
+                tb_set_cell(column, row , BOX_BL , FOREGROUND , BACKGROUND);
             } 
             else if (row == c_box_height_limit && column == c_box_width_limit) { // Bottom right corner
-                tb_set_cell(column, row , BOX_BR , COLOR_WHITE , TB_256_BLACK);
+                tb_set_cell(column, row , BOX_BR , FOREGROUND , BACKGROUND);
             }
             else if (row == 0 || row == c_box_height_limit) { // Horizontal lines
-                tb_set_cell(column, row , BOX_HL , COLOR_WHITE , TB_256_BLACK);
+                tb_set_cell(column, row , BOX_HL , FOREGROUND , BACKGROUND);
             } 
             else if (column == 0 || column == c_box_width_limit) { // Vertical lines
-                tb_set_cell(column, row , BOX_VL , COLOR_WHITE , TB_256_BLACK);
+                tb_set_cell(column, row , BOX_VL , FOREGROUND , BACKGROUND);
             }
         }
     }
 };
 
-void pretty_print(const string& text, int x, int y, uint16_t fg_color = COLOR_WHITE, uint16_t bg_color = TB_256_BLACK) {
+void pretty_print(const string& text, int x, int y, uint16_t fg_color = FOREGROUND, uint16_t bg_color = BACKGROUND) {
     for (size_t i = 0; i < text.size(); ++i) {
         tb_set_cell(x + i, y, text[i], fg_color, bg_color);
     }
@@ -287,23 +290,23 @@ void draw_rotor_assembly(Enigma enigma, bool mode_set = false ) {
         for (int column = 0; column <= c_box_width_limit; column++) {
             for (int row = 0; row <= c_box_height_limit; row++) {
                 if (row == 0 && column == 0) { // Top left corner
-                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_TL, COLOR_WHITE, TB_256_BLACK);
+                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_TL, FOREGROUND, BACKGROUND);
                 } 
                 else if (row == 0 && column == c_box_width_limit) { // Top right corner
-                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_TR, COLOR_WHITE, TB_256_BLACK);
+                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_TR, FOREGROUND, BACKGROUND);
                 } 
                 else if (row == c_box_height_limit && column == 0) { // Bottom left corner
-                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_BL, COLOR_WHITE, TB_256_BLACK);
+                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_BL, FOREGROUND, BACKGROUND);
                 } 
                 else if (row == c_box_height_limit && column == c_box_width_limit) { // Bottom right corner
-                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_BR, COLOR_WHITE, TB_256_BLACK);
+                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_BR, FOREGROUND, BACKGROUND);
                 }
                 else if (row == c_rotor_box_center_y && 
                     column >= c_rotor_box_center_x && 
                     column < c_rotor_box_center_x + rotor_number_str.size()) { // Print rotor number in the center
 
                     char digit = rotor_number_str[column - c_rotor_box_center_x];
-                    tb_set_cell(rotor_x + column, rotor_y + row, digit, COLOR_GOLD, TB_256_BLACK);
+                    tb_set_cell(rotor_x + column, rotor_y + row, digit, COLOR_GOLD, BACKGROUND);
                 }
                 else if ((row - c_rotor_box_center_y) % (1+intra_rotor_number_y) == 0 && 
                     abs(((row - c_rotor_box_center_y) / (1+intra_rotor_number_y))) == (shown_rotor_number_count-1)/2 && 
@@ -313,7 +316,7 @@ void draw_rotor_assembly(Enigma enigma, bool mode_set = false ) {
                     int normalised = normalisePosition(current_rotor_number + (-(row-c_rotor_box_center_y)) / (intra_rotor_number_y+1));
                     string offset_rotor_number = get_rotor_number_as_str(normalised ? normalised : 26);
                     char digit = offset_rotor_number[column - c_rotor_box_center_x];
-                    tb_set_cell(rotor_x + column, rotor_y + row, digit, COLOR_WHITE, TB_256_BLACK);
+                    tb_set_cell(rotor_x + column, rotor_y + row, digit, FOREGROUND, BACKGROUND);
                 }
                 else if ((row - c_rotor_box_center_y) % (1+intra_rotor_number_y) == 0 &&
                     abs(((row - c_rotor_box_center_y) / (1+intra_rotor_number_y))) == ((shown_rotor_number_count-1)/2)+1 && 
@@ -321,13 +324,13 @@ void draw_rotor_assembly(Enigma enigma, bool mode_set = false ) {
                     column < c_rotor_box_center_x + rotor_number_str.size()) {
 
                     uint32_t digit = (column - c_rotor_box_center_x) == 0 ? rotor_key_bindings[(row-c_rotor_box_center_y)>0][i] : ((row-c_rotor_box_center_y)>0) ? ARROW_DOWN : ARROW_UP;
-                    tb_set_cell(rotor_x + column, rotor_y + row, digit, COLOR_WHITE, (mode_set ? COLOR_BLUE : TB_256_BLACK));
+                    tb_set_cell(rotor_x + column, rotor_y + row, digit, FOREGROUND, (mode_set ? COLOR_BLUE : BACKGROUND));
                 }
                 else if (row == 0 || row == c_box_height_limit) { // Horizontal lines
-                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_HL, COLOR_WHITE, TB_256_BLACK);
+                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_HL, FOREGROUND, BACKGROUND);
                 } 
                 else if (column == 0 || column == c_box_width_limit) { // Vertical lines
-                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_VL, COLOR_WHITE, TB_256_BLACK);
+                    tb_set_cell(rotor_x + column, rotor_y + row, BOX_VL, FOREGROUND, BACKGROUND);
                 }
             }
         }
@@ -348,13 +351,13 @@ void draw_keyboard(Enigma enigma, uint32_t last_char = 0x0000 ,bool mode_set = f
             int raw_row = outer_y + rotor_box_height + row*(intra_lampboard_row+1) - 1;
             int raw_column = outer_x + inner_x + column*(intra_letter_gap+1);
             if (!mode_set) {
-                tb_set_cell(raw_column , raw_row , lampboard[row][column] , COLOR_WHITE , (lampboard[row][column] == last_char ? COLOR_BLUE : TB_256_BLACK));
+                tb_set_cell(raw_column , raw_row , lampboard[row][column] , FOREGROUND , (lampboard[row][column] == last_char ? COLOR_BLUE : BACKGROUND));
             }else {
                 vector<pair<char , char>> couplings = enigma.plugboard.getConnections().getPairs();
                 auto it = find_if(couplings.begin() , couplings.end() , [&row , &column](const auto& p){
                     return lampboard[row][column] == (uint32_t)p.first || lampboard[row][column] == (uint32_t)p.second;
                 });
-                tb_set_cell(raw_column, raw_row , lampboard[row][column] , (it == couplings.end()) ? COLOR_WHITE : plugboard_colors[it - couplings.begin()] , TB_256_BLACK);
+                tb_set_cell(raw_column, raw_row , lampboard[row][column] , (it == couplings.end()) ? FOREGROUND : plugboard_colors[it - couplings.begin()] , BACKGROUND);
 
             }
         }
@@ -363,11 +366,11 @@ void draw_keyboard(Enigma enigma, uint32_t last_char = 0x0000 ,bool mode_set = f
 }
 
 void debug_info() { //Hardcoded info
-    pretty_print("1930 Enigma I with rotors I, II and III, reflector B" , outer_box_width+1 , 1 , COLOR_WHITE , TB_256_BLACK);
-    pretty_print("Rotor 1:   EKMFLGDQVZNTOWYHXUSPAIBRCJ" , outer_box_width+1 , 2 , COLOR_WHITE , TB_256_BLACK);
-    pretty_print("Rotor 2:   AJDKSIRUXBLHWTMCQGZNPYFVOE" , outer_box_width+1 , 3 , COLOR_WHITE , TB_256_BLACK);
-    pretty_print("Rotor 3:   BDFHJLCPRTXVZNYEIWGAKMUSQO" , outer_box_width+1 , 4 , COLOR_WHITE , TB_256_BLACK);
-    pretty_print("Reflector: YRUHQSLDPXNGOKMIEBFZCWVJAT" , outer_box_width+1 , 5 , COLOR_WHITE , TB_256_BLACK);
+    pretty_print("1930 Enigma I with rotors I, II and III, reflector B" , outer_box_width+1 , 1 , FOREGROUND , BACKGROUND);
+    pretty_print("Rotor 1:   EKMFLGDQVZNTOWYHXUSPAIBRCJ" , outer_box_width+1 , 2 , FOREGROUND , BACKGROUND);
+    pretty_print("Rotor 2:   AJDKSIRUXBLHWTMCQGZNPYFVOE" , outer_box_width+1 , 3 , FOREGROUND , BACKGROUND);
+    pretty_print("Rotor 3:   BDFHJLCPRTXVZNYEIWGAKMUSQO" , outer_box_width+1 , 4 , FOREGROUND , BACKGROUND);
+    pretty_print("Reflector: YRUHQSLDPXNGOKMIEBFZCWVJAT" , outer_box_width+1 , 5 , FOREGROUND , BACKGROUND);
 }
 
 #pragma endregion
@@ -410,10 +413,10 @@ int main() {
             switch (state) {
                 case 0: {// Intro Screen
                     draw_welcome_box();
-                    draw_enigma_title(center(((6*FONT_W)+5) , outer_box_width), 5, COLOR_GOLD, TB_256_BLACK); 
-                    pretty_print("Press Enter to Start", center(20 , outer_box_width), 12, COLOR_GREEN, TB_256_BLACK); 
-                    pretty_print("Press SPCACE to change modes", center(28, outer_box_width), 14, COLOR_BLUE , TB_256_BLACK);
-                    pretty_print("Press Ctrl+Q to Quit", center(20, outer_box_width), 16, COLOR_RED, TB_256_BLACK);
+                    draw_enigma_title(center(((6*FONT_W)+5) , outer_box_width), 5, COLOR_GOLD, BACKGROUND); 
+                    pretty_print("Press Enter to Start", center(20 , outer_box_width), 12, COLOR_GREEN, BACKGROUND); 
+                    pretty_print("Press SPCACE to change modes", center(28, outer_box_width), 14, COLOR_BLUE , BACKGROUND);
+                    pretty_print("Press Ctrl+Q to Quit", center(20, outer_box_width), 16, COLOR_RED, BACKGROUND);
 
                     if (debug_action) { debug_action(); debug_action = nullptr;}
 
@@ -460,7 +463,7 @@ int main() {
                         if (ev.ch == TB_KEY_SPACE) {
                             state = 2;
                             debug_action = [&]() -> void {
-                                pretty_print("Switched to \"Set\" mode" , 0 , outer_box_height+1 , COLOR_WHITE , COLOR_YELLOW);
+                                pretty_print("Switched to \"Set\" mode" , 0 , outer_box_height+1 , FOREGROUND , COLOR_YELLOW);
                             };
                         }
                         if (checkIfEngimaEnabledChar(toupper(ev.ch))){
@@ -475,7 +478,7 @@ int main() {
                             primal_connection.first = 0x0000;
                             primal_connection.second = 0x0000;
                             debug_action = [&]() -> void {
-                                pretty_print("Switched to \"Encrypt\" mode" , 0 , outer_box_height+1 , COLOR_WHITE , COLOR_YELLOW);
+                                pretty_print("Switched to \"Encrypt\" mode" , 0 , outer_box_height+1 , FOREGROUND , COLOR_YELLOW);
                             };
                         } 
 
@@ -483,7 +486,7 @@ int main() {
                             if (primal_connection.first == 0x0000){
                                 primal_connection.first = toupper(ev.ch);
                                 debug_action = [&]() -> void {
-                                    pretty_print(string("Listening for couple of: ") + (char)primal_connection.first, 0, outer_box_height+1, COLOR_WHITE, COLOR_CYAN);
+                                    pretty_print(string("Listening for couple of: ") + (char)primal_connection.first, 0, outer_box_height+1, FOREGROUND, COLOR_CYAN);
                                 };
                                 break;
                             } else if(primal_connection.second == 0x0000) {
@@ -494,7 +497,7 @@ int main() {
                                         uint32_t a = primal_connection.first; //Capture before thay are gone
                                         uint32_t b = primal_connection.second;
                                         debug_action = [a , b]() -> void {
-                                            pretty_print((string("Removed: ") + (char)a + string("-") +(char)b) , 0 , outer_box_height+1 , COLOR_WHITE , COLOR_RED);
+                                            pretty_print((string("Removed: ") + (char)a + string("-") +(char)b) , 0 , outer_box_height+1 , FOREGROUND , COLOR_RED);
                                         };
                                         enigma.plugboard.removeConnection(new_connection);
                                     } else {
@@ -502,7 +505,7 @@ int main() {
                                     }
                                 } catch (std::exception& e) {
                                     debug_action = [&]() -> void {
-                                        pretty_print(e.what() , 0 , outer_box_height+1 ,COLOR_WHITE , COLOR_RED);
+                                        pretty_print(e.what() , 0 , outer_box_height+1 ,FOREGROUND , COLOR_RED);
                                     };
                                     break;
                                 }
@@ -529,7 +532,7 @@ int main() {
             }
             char dbg[64];
             snprintf(dbg, sizeof(dbg), "type:%d key:%d ch:%d", ev.type, ev.key, ev.ch);
-            pretty_print(dbg, 0, outer_box_height+2, COLOR_WHITE, TB_256_BLACK);
+            pretty_print(dbg, 0, outer_box_height+2, FOREGROUND, BACKGROUND);
 
         } 
     
