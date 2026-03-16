@@ -62,7 +62,7 @@ Or manually:
 ## Project Structure
 
 - `src/` — Source code
-- `build` - For compiled programs
+- `build/` - For compiled programs
 - `external/` - For git submodules
 
 ## Contributing
