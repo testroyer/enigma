@@ -54,11 +54,9 @@ namespace EnigmaMachine {
      */
     class Rotor {
         private:
+            std::map<char ,char> intWiring; ///< Internal "forwards" wiring.
             int position; ///< Current orientation of the rotor.
             int notchPlacement; ///< Position that rotates the next rotor.
-
-        protected:
-            std::map<char ,char> intWiring; ///< Internal "forwards" wiring.
             std::map<char, char> reverseWiring; ///< Internal "backwards" wiring.
 
             /**

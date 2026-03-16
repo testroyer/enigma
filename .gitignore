@@ -37,7 +37,6 @@ Thumbs.db
 CMakeFiles/
 CMakeUserPresets.json
 cmake_install.cmake
-Makefile
 *.cmake
 
 # Dependencies

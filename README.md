@@ -24,6 +24,11 @@ A C/C++ implementation of the historic Enigma machine — the cipher device used
 Clone the repository and compile the source files using your preferred compiler. For example, with GCC:
 
 ```bash
+make 
+```
+Or manually:
+
+```bash
 git clone https://github.com/[yourusername]/enigma.git
 cd enigma
 g++ ./src/*.cpp -o .build/enigma
@@ -35,9 +40,20 @@ Or with Clang:
 clang++ ./src/*.cpp -o ./build/enigma
 ```
 
+To clean:
+```bash
+make clean
+```
+
 ## Usage
 
 Run the script after compiling
+
+```bash
+make run
+```
+
+Or manually:
 
 ```bash 
 ./build/enigma

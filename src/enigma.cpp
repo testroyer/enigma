@@ -321,7 +321,7 @@ namespace EnigmaMachine {
                 oss << "Error: Size of rotors, rotorPositions and notchPositions must be the same and mustn't be empty. Object at" << this;
                 throw std::runtime_error(oss.str());
             }
-            for (int i = 0; i < rotors.size() ; i++) {
+            for (size_t i = 0; i < rotors.size() ; i++) {
                 (*this).rotors.emplace_back(*(rotors.begin()+i) , *(rotorPositions.begin()+i) , *(notchPositions.begin()+i)); // Pointer magic cause you know C++ TODO: Might be a bit unsafe. do an iter for each maybe?
             }
         };
@@ -335,7 +335,7 @@ namespace EnigmaMachine {
                 oss << "Error: Size of rotorsChiffres, rotorPositions and notchPositions must be the same and mustn't be empty. Object at" << this;
                 throw std::runtime_error(oss.str());
             }
-            for (int i = 0; i < rotorsChiffres.size() ; i++) {
+            for (size_t i = 0; i < rotorsChiffres.size() ; i++) {
                 (*this).rotors.emplace_back(*(rotorsChiffres.begin()+i) , *(rotorPositions.begin()+i) , *(notchPositions.begin()+i)); // Pointer magic cause you know C++
             }
         };
@@ -425,7 +425,7 @@ namespace EnigmaMachine {
                 throw runtime_error("Error: positions size does not match rotors size.");
             }
 
-            for (int i = 0; i < this->rotors.size(); i++) {
+            for (size_t i = 0; i < this->rotors.size(); i++) {
                 if (positions[i] < 0 || positions[i] > 25) {
                     throw runtime_error("Error: rotor positions must be integers within [0 , 25].");
                 }
@@ -440,7 +440,7 @@ namespace EnigmaMachine {
                 throw runtime_error("Error: positions size does not match rotors size.");
             }
 
-            for (int i = 0; i < this->rotors.size(); i++) {
+            for (size_t i = 0; i < this->rotors.size(); i++) {
                 int currentPosition = *(positions.begin()+i);
                 if (currentPosition < 0 || currentPosition > 25) {
                     throw runtime_error("Error: rotor positions must be integers within [0 , 25].");

@@ -274,7 +274,7 @@ void draw_rotor_assembly(Enigma enigma, bool mode_set = false ) {
     int rotor_assembly_y = center(rotor_element_heigth , rotor_box_height);
 
     //Get border placements
-    for (int i = 0; i < enigma.rotors.size(); i++) {
+    for (size_t i = 0; i < enigma.rotors.size(); i++) {
         //Top-left of the current rotor box
         int reversed_i = enigma.rotors.size() - 1 - i;
         int rotor_x = rotor_assembly_x + reversed_i * (rotor_element_width + intra_rotor_gap);
@@ -306,7 +306,7 @@ void draw_rotor_assembly(Enigma enigma, bool mode_set = false ) {
                 }
                 else if (row == current_rotor_y && 
                     column >= current_rotor_x && 
-                    column < current_rotor_x + rotor_number_str.size()) { // Print rotor number in the center
+                    column < current_rotor_x + (int)rotor_number_str.size()) { // Print rotor number in the center
 
                     char digit = rotor_number_str[column - current_rotor_x];
                     tb_set_cell(rotor_x + column, rotor_y + row, digit, COLOR_GOLD, BACKGROUND);
@@ -314,7 +314,7 @@ void draw_rotor_assembly(Enigma enigma, bool mode_set = false ) {
                 else if ((row - current_rotor_y) % (1+intra_rotor_numbers) == 0 && 
                     abs(((row - current_rotor_y) / (1+intra_rotor_numbers))) == (rotor_shown_number_count-1)/2 && 
                     column >= current_rotor_x && 
-                    column < current_rotor_x + rotor_number_str.size()) {
+                    column < current_rotor_x + (int)rotor_number_str.size()) {
 
                     int normalised = normalisePosition(current_rotor_number + (-(row-current_rotor_y)) / (intra_rotor_numbers+1));
                     string offset_rotor_number = get_rotor_number_as_str(normalised ? normalised : 26);
@@ -324,7 +324,7 @@ void draw_rotor_assembly(Enigma enigma, bool mode_set = false ) {
                 else if ((row - current_rotor_y) % (1+intra_rotor_numbers) == 0 &&
                     abs(((row - current_rotor_y) / (1+intra_rotor_numbers))) == ((rotor_shown_number_count-1)/2)+1 && 
                     column >= current_rotor_x && 
-                    column < current_rotor_x + rotor_number_str.size()) {
+                    column < current_rotor_x + (int)rotor_number_str.size()) {
 
                     uint32_t digit = (column - current_rotor_x) == 0 ? rotor_key_bindings[(row-current_rotor_y)>0][i] : ((row-current_rotor_y)>0) ? ARROW_DOWN : ARROW_UP;
                     tb_set_cell(rotor_x + column, rotor_y + row, digit, FOREGROUND, (mode_set ? COLOR_BLUE : BACKGROUND));
@@ -347,7 +347,7 @@ void draw_keyboard(Enigma enigma, uint32_t last_char = 0x0000 ,bool mode_set = f
     int outer_x = center(lampboard_assembly_width, outer_box_width);
     int outer_y = center(lampboard_assembly_height , lampboard_height);
 
-    for (int row = 0; row < lampboard.size() ; row++){
+    for (size_t row = 0; row < lampboard.size() ; row++){
         int rowSize = lampboard[row].size();
         int inner_x = center((rowSize + (rowSize-1)*intra_letter_gap) , lampboard_assembly_width); 
         for (int column = 0; column < rowSize; column++ ){
