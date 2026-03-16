@@ -21,16 +21,16 @@ A C/C++ implementation of the historic Enigma machine — the cipher device used
 
 ### Build
 
-Clone the repository and compile the source files using your preferred compiler. For example, with GCC:
-
-```bash
-make 
-```
-Or manually:
+Clone the repository and compile the source files using your preferred compiler. For example:
 
 ```bash
 git clone https://github.com/testroyer/enigma.git
 cd enigma
+make 
+```
+Or manually, with GCC:
+
+```bash
 g++ ./src/*.cpp -o .build/enigma
 ```
 
