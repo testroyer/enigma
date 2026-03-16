@@ -29,7 +29,7 @@ make
 Or manually:
 
 ```bash
-git clone https://github.com/[yourusername]/enigma.git
+git clone https://github.com/testroyer/enigma.git
 cd enigma
 g++ ./src/*.cpp -o .build/enigma
 ```
