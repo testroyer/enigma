@@ -5,13 +5,13 @@ A C/C++ implementation of the historic Enigma machine — the cipher device used
 ## Screenshots
 
 *Welcome screen*
-![Welcome Screen](screenshots/welcome.png)
+![Welcome Screen](docs/screenshots/welcome.png)
 
 *Encyrpt screen*
-![Encryption Screen](screenshots/encryption.png)
+![Encryption Screen](docs/screenshots/encryption.png)
 
 *Set screen*
-![Set Screen](screenshots/set.png)
+![Set Screen](docs/screenshots/set.png)
 
 ## Getting Started
 
