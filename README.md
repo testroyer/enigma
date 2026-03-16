@@ -4,14 +4,14 @@ A C/C++ implementation of the historic Enigma machine — the cipher device used
 
 ## Screenshots
 
-![Welcome Screen](screenshots/welcome.png)
 *Welcome screen*
+![Welcome Screen](screenshots/welcome.png)
 
-![Encryption Screen](screenshots/encryption.png)
 *Encyrpt screen*
+![Encryption Screen](screenshots/encryption.png)
 
-![Set Screen](screenshots/set.png)
 *Set screen*
+![Set Screen](screenshots/set.png)
 
 ## Getting Started
 
