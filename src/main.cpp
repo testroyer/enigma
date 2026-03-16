@@ -13,7 +13,7 @@ using namespace EnigmaMachine;
 
 #pragma region Global Definitions
 
-// Constant definitions of ASCII box building characters
+// Constant definitions of ASCII characters
 #define BOX_TL 0x250C // Top left corner 
 #define BOX_TR 0x2510 // Top right corner
 #define BOX_BL 0x2514 // Bottom left corner
@@ -30,6 +30,7 @@ using namespace EnigmaMachine;
 #define ARROW_UP   0x2191 //↑
 #define ARROW_DOWN 0x2193 //↓
 
+// Definitions according to termbox's 256 colours
 #define COLOR_BLACK      0    // black
 #define COLOR_RED        1    // red
 #define COLOR_GREEN      2    // green
@@ -66,6 +67,7 @@ constexpr int plugboard_colors[13] = {
     COLOR_GOLD,
 };
 
+// Rotor/Keyboard assembly related
 constexpr int expected_rotor_count = 3;
 
 // Key bindings
@@ -365,7 +367,7 @@ void draw_keyboard(Enigma enigma, uint32_t last_char = 0x0000 ,bool mode_set = f
 
 }
 
-void debug_info() { //Hardcoded info
+void draw_info() { //Hardcoded info
     pretty_print("1930 Enigma I with rotors I, II and III, reflector B" , outer_box_width+1 , 1 , FOREGROUND , BACKGROUND);
     pretty_print("Rotor 1:   EKMFLGDQVZNTOWYHXUSPAIBRCJ" , outer_box_width+1 , 2 , FOREGROUND , BACKGROUND);
     pretty_print("Rotor 2:   AJDKSIRUXBLHWTMCQGZNPYFVOE" , outer_box_width+1 , 3 , FOREGROUND , BACKGROUND);
@@ -389,10 +391,9 @@ int main() {
             return 1;
         }
         Reflector reflector = Reflector("YRUHQSLDPXNGOKMIEBFZCWVJAT");
-        Bipair<char> plugboardWiring = Bipair<char>({{'Q', 'W'}});
+        Bipair<char> plugboardWiring = Bipair<char>({});
         Plugboard plugboard = Plugboard(plugboardWiring);
         Enigma enigma = Enigma(rotors, reflector, plugboard);
-
 
         tb_init();
     	tb_set_output_mode(TB_OUTPUT_256);
@@ -401,14 +402,13 @@ int main() {
         //State variables
         uint32_t lastPressed = 0x0000;
         int state = 0; // 0 = Intro Screen, 1 = Encryption, 2 = Set Rotors
+        bool info = false;
         bool running = true;
         pair<uint32_t , uint32_t> primal_connection = {0x0000 , 0x0000};
 
 
         while (running) {
             tb_clear();
-            
-
 
             switch (state) {
                 case 0: {// Intro Screen
@@ -426,7 +426,7 @@ int main() {
                     draw_outer_box();
                     draw_rotor_assembly(enigma , false);
                     draw_keyboard(enigma, lastPressed);
-                    debug_info();
+                    if (info) draw_info();
                     if (debug_action) { debug_action(); debug_action = nullptr;}
                 
                     break;
@@ -435,7 +435,7 @@ int main() {
                     draw_outer_box();
                     draw_rotor_assembly(enigma , true);
                     draw_keyboard(enigma , 0x0000 , true);
-                    debug_info();
+                    if (info) draw_info();
                     if (debug_action) { debug_action(); debug_action = nullptr;}
                 
                     break;
@@ -451,15 +451,18 @@ int main() {
                 if (ev.key == TB_KEY_CTRL_Q) {
                     running = false;
                 }
+                else if (ev.ch == '"') {
+                    info = !info;
+                }
                 switch (state){
-                    case 0: { // Intro screen
+                    case 0: { // Intro
                         if (ev.key == TB_KEY_ENTER) {
                             state = 1; // Move to encryption screen
                         }
                         break;
                     }
 
-                    case 1: {//Encrypt
+                    case 1: { //Encrypt
                         if (ev.ch == TB_KEY_SPACE) {
                             state = 2;
                             debug_action = [&]() -> void {
@@ -541,6 +544,7 @@ int main() {
 
       
     } catch (const std::exception& e) {
+        tb_shutdown();
         cout << "exception: " << e.what() << "\n";
         return 1;
     }

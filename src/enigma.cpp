@@ -14,18 +14,16 @@
 using namespace std;
 
 namespace EnigmaMachine {
-    // Every class has two ctors, one that ctors with built objects and one that ctors with initializer lists. 
-    // The value 26 is usually hard coded for enigmaAllowedLetters.size();
-    //TODO: String ctors, chiffres and runs along with chars
-    //TODO: Iter increments
 
-    #pragma region Enigma-allowed characters and related functions
-    
-    // enigmaAllowedLetters(i) = enigmaLetterToIndex^-1(i)
+    #pragma region Definitions
+    // Enigma-allowed characters and related functions
     const std::string enigmaAllowedLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-    // character - 'A' Works best so depracated 
-    const map<char, int> enigmaLetterToIndex = {{'A', 0}, {'B', 1}, {'C', 2}, {'D', 3}, {'E', 4}, {'F', 5}, {'G', 6}, {'H', 7}, {'I', 8}, {'J', 9}, {'K', 10}, {'L', 11}, {'M', 12}, {'N', 13}, {'O', 14}, {'P', 15}, {'Q', 16}, {'R', 17}, {'S', 18}, {'T', 19}, {'U', 20}, {'V', 21}, {'W', 22}, {'X', 23}, {'Y', 24}, {'Z', 25}};
+    const map<char, int> enigmaLetterToIndex = {
+        {'A', 0}, {'B', 1}, {'C', 2}, {'D', 3}, {'E', 4}, {'F', 5}, {'G', 6}, {'H', 7},
+        {'I', 8}, {'J', 9}, {'K', 10}, {'L', 11}, {'M', 12}, {'N', 13}, {'O', 14}, {'P', 15},
+        {'Q', 16}, {'R', 17}, {'S', 18}, {'T', 19}, {'U', 20}, {'V', 21}, {'W', 22}, {'X', 23},
+        {'Y', 24}, {'Z', 25}
+    };
 
     bool checkIfEngimaEnabledChar(char character) noexcept {
         return ((character >= 'A' && character <= 'Z')); // Removed isupper cause it is between the bounds.
@@ -158,10 +156,6 @@ namespace EnigmaMachine {
             return this->reverseWiring.at(character);
         };
 
-        //Scrapped function ideas, might be useful later on but for now they just add unneccesary complexity
-        // void rotateBackwards();
-        // string run();   //Wouldn't hurt to have a string overload lateron
-        // string reverseRun();
 
     #pragma endregion 
 
@@ -317,10 +311,7 @@ namespace EnigmaMachine {
             this->rotors = rotors;
         };
         
-        /*
-        Gets the data to create the objects itself.
-        Problem with these is that they don't determine any notch placement
-        */
+        // Gets the data to create the objects itself.
         Enigma::Enigma(initializer_list<map<char, char>> rotors, initializer_list<int> rotorPositions, initializer_list<int> notchPositions, Bipair<char> reflector, Bipair<char> initialPlugboard) 
             : reflector(reflector), 
             plugboard(initialPlugboard) 
@@ -349,13 +340,6 @@ namespace EnigmaMachine {
             }
         };
 
-        /*
-        Important formula: ===================================================================
-        rotor_input = previous_rotor_exit - previous_rotor_position + current_rotor_position
-                        char(cast to int)   - int                     + int
-        where these are calculated as integers mapped from A to Z
-        Not sure if A should start from 0 or 1 yet in theory is shan't matter.
-        =====================================================================================*/
         char Enigma::encrypt(char character) {
             if (character == ' ') {
                 return character;
@@ -364,7 +348,7 @@ namespace EnigmaMachine {
             // Rotate logic
             for (auto rotor = rotors.begin() ; rotor != rotors.end() ; ++rotor) {
                 bool rotateNext = rotor->rotate();
-                if (!rotateNext) { // If the current rotor doesn't cause the next one to rotate or if it is the last rotor,
+                if (!rotateNext) { // If the current rotor doesn't cause the next one to rotate. 
                     break;
                 }
             }
@@ -379,10 +363,8 @@ namespace EnigmaMachine {
             // Plugboard first run
             currentCharacterState = this->plugboard.run(currentCharacterState); 
 
-            //TODO: Sperate the rotor assembly to a different function
-
             // Rotors first run
-            for (auto rotor = this->rotors.begin() ; rotor != this->rotors.end() ; rotor++) {
+            for (auto rotor = this->rotors.begin() ; rotor != this->rotors.end() ; ++rotor) {
                 currentCharacterState = rotor->run(this->determineRotorInput(
                     currentCharacterState, 
                     rotor->getPosition(), 
@@ -414,12 +396,15 @@ namespace EnigmaMachine {
 
         };
 
-        //Caution while calling this as the paramater and formula placement are mixed
-        char Enigma::determineRotorInput(char character, int nextPosition, int previousPos) const {
+        /*Important formula: ==================================================================
+        rotor_input = previous_rotor_exit - previous_rotor_position + current_rotor_position
+        rotor_input = char(cast to int)   - int                     + int
+        where these are calculated as integers mapped from A to Z
+        =====================================================================================*/
+        char Enigma::determineRotorInput(char character, int nextPosition, int previousPos) const {  //Caution while calling this as the paramater and formula placement are mixed
             return enigmaAllowedLetters[(
                 normalisePosition((normalisePosition((character - 'A') - previousPos)) + nextPosition)
-                )];
-
+            )];
         }
 
         string Enigma::encrypt(string message) {
