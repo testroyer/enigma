@@ -161,6 +161,7 @@ const bool letters[][FONT_H][FONT_W] = {
 #pragma region Helper lambdas
 
 std::function<void()> debug_action = nullptr;
+tb_event lastEvent;
 
 auto center = [](int size ,int outer_element_width , bool biggerGapFirst = false) -> int { 
     return (int)(((outer_element_width-2)-size)/2.0)+((int)(biggerGapFirst))+border; 
@@ -367,12 +368,16 @@ void draw_keyboard(Enigma enigma, uint32_t last_char = 0x0000 ,bool mode_set = f
 
 }
 
-void draw_info() { //Hardcoded info
+void draw_info(tb_event ev) { //Hardcoded info
     pretty_print("1930 Enigma I with rotors I, II and III, reflector B" , outer_box_width+1 , 1 , FOREGROUND , BACKGROUND);
     pretty_print("Rotor 1:   EKMFLGDQVZNTOWYHXUSPAIBRCJ" , outer_box_width+1 , 2 , FOREGROUND , BACKGROUND);
     pretty_print("Rotor 2:   AJDKSIRUXBLHWTMCQGZNPYFVOE" , outer_box_width+1 , 3 , FOREGROUND , BACKGROUND);
     pretty_print("Rotor 3:   BDFHJLCPRTXVZNYEIWGAKMUSQO" , outer_box_width+1 , 4 , FOREGROUND , BACKGROUND);
     pretty_print("Reflector: YRUHQSLDPXNGOKMIEBFZCWVJAT" , outer_box_width+1 , 5 , FOREGROUND , BACKGROUND);
+
+    char dbg[64];
+    snprintf(dbg, sizeof(dbg), "type:%d key:%d ch:%d ch:\"%c\"", ev.type, ev.key, ev.ch , (toupper(ev.ch)));
+    pretty_print(dbg, outer_box_width+1, 7, FOREGROUND, BACKGROUND);
 }
 
 #pragma endregion
@@ -429,7 +434,7 @@ int main() {
                         draw_outer_box();
                         draw_rotor_assembly(enigma , false);
                         draw_keyboard(enigma, lastPressed);
-                        if (info) draw_info();
+                        if (info) draw_info(lastEvent);
                         if (debug_action) { debug_action(); debug_action = nullptr;}
                     
                         break;
@@ -438,7 +443,7 @@ int main() {
                         draw_outer_box();
                         draw_rotor_assembly(enigma , true);
                         draw_keyboard(enigma , 0x0000 , true);
-                        if (info) draw_info();
+                        if (info) draw_info(lastEvent);
                         if (debug_action) { debug_action(); debug_action = nullptr;}
                     
                         break;
@@ -451,6 +456,7 @@ int main() {
             #pragma region Event loop
                 tb_event ev;
                 tb_poll_event(&ev);
+                lastEvent = ev;
                 if (ev.type != TB_EVENT_KEY ) continue;;
                 if (ev.type == TB_EVENT_KEY ) {
                     if (ev.key == TB_KEY_CTRL_Q) {
@@ -458,6 +464,14 @@ int main() {
                     }
                     else if (ev.ch == '"') {
                         info = !info;
+                        debug_action = [info]() {
+                            if (info) {
+                                pretty_print("[Debug mode on]" , 0 , outer_box_height+1 , FOREGROUND , COLOR_YELLOW);
+                            } else {
+
+                                pretty_print("[Debug mode off]" , 0 , outer_box_height+1 , FOREGROUND , COLOR_YELLOW);
+                            }
+                        };
                     }
                     switch (state){
                         case 0: { // Intro
